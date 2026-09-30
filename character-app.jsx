@@ -1,0 +1,2221 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+
+
+// --- OPTIONS & CONFIGURATION ---
+
+const OPTIONS = {
+
+  gender: ['Female', 'Male'],
+
+  facialHair: ['Clean', 'Mustache', 'Beard'],
+
+  upperWear: ['T-shirt', 'Shirt', 'Sweatshirt', 'Raincoat', 'Jumper', 'Suit', 'Jacket', 'Lab coat', 'Police Uniform', 'Firefighter Uniform', 'Workers Vest', "Worker's Overalls", 'Dress'],
+
+  lowerWear: ['Trousers', 'Jeans', 'Skirt', 'Suit-Pants', 'Sweatpants'],
+
+  shoes: ['Sneakers', 'Boots', 'High heels', 'Classic', 'Long boots'],
+
+  accessories: [
+
+    'Hat', 'Police Hat', 'Firefighter Hat', 'Chef Hat', 'Hard hat',
+
+    'Stethoscope', 'Gloves', 'Watch', 'Glasses', 'Sunglasses', 
+
+    'Bag', 'Necklace', 'Scarf', 'Tie', 'Earrings', 'Umbrella', 'Belt'
+
+  ],
+
+  hairStyle: ['None', 'Straight', 'Wavy', 'Curly'],
+
+  hairLength: ['Short', 'Medium', 'Long'],
+
+  hairColor: ['Blonde', 'Blond', 'Grey', 'Dark', 'Brown', 'Red'],
+
+  eyeColor: ['Green', 'Blue', 'Hazel', 'Brown'],
+
+  height: ['Tall', 'Medium', 'Short'],
+
+  bodyType: ['Fat', 'Plump', 'Average', 'Slim']
+
+};
+
+
+
+const METRICS = {
+
+  height: { 'Tall': '1.90 m', 'Medium': '1.75 m', 'Short': '1.60 m' },
+
+  weight: { 'Fat': '110 kg', 'Plump': '90 kg', 'Average': '75 kg', 'Slim': '60 kg' }
+
+};
+
+
+
+const COLORS = {
+
+  skin: '#ffe0bd',
+
+  skinDark: '#f0cba3',
+
+  lipFemale: '#e88a8a', 
+
+  lipFemaleDark: '#c56b6b',
+
+  lipMale: '#a55a4e',
+
+  hair: {
+
+    Blonde: '#fde047', Blond: '#fef08a', Grey: '#d1d5db',
+
+    Dark: '#1f2937', Brown: '#713f12', Red: '#b91c1c'
+
+  },
+
+  eye: { Green: '#16a34a', Blue: '#2563eb', Hazel: '#ca8a04', Brown: '#451a03' },
+
+  clothing: {
+
+    'T-shirt': '#dc2626', 'Shirt': '#3b82f6', 'Sweatshirt': '#64748b',
+
+    'Raincoat': '#facc15', 'Jumper': '#059669', 'Suit': '#1e293b',
+
+    'Jacket': '#475569', 'Lab coat': '#ffffff', 'Police Uniform': '#1e3a8a',
+
+    'Firefighter Uniform': '#45474a', 'Workers Vest': '#fb923c', "Worker's Overalls": '#1e3a8a',
+
+    'Trousers': '#334155', 'Jeans': '#2563eb', 'Skirt': '#db2777',
+
+    'Dress': '#8b5cf6', 'Suit-Pants': '#1e293b', 'Sweatpants': '#4b5563',
+
+    'Hat': '#451a03', 'Police Hat': '#1e3a8a', 'Firefighter Hat': '#b91c1c',
+
+    'Chef Hat': '#ffffff', 'Hard hat': '#facc15', 'Stethoscope': '#475569',
+
+    'Gloves': '#1e293b', 'Watch': '#334155', 'Glasses': '#1f2937',
+
+    'Sunglasses': '#000000', 'Bag': '#78350f', 'Necklace': '#fbbf24',
+
+    'Scarf': '#ea580c', 'Tie': '#be123c', 'Earrings': '#fcd34d',
+
+    'Umbrella': '#374151', 'Belt': '#27272a'
+
+  },
+
+  shoes: {
+
+    'Sneakers': '#e2e8f0', 'Boots': '#5d4037', 'High heels': '#be123c',
+
+    'Classic': '#171717', 'Long boots': '#262626'
+
+  }
+
+};
+
+
+
+const TRANSLATIONS = {
+
+  gender: 'Gender', facialHair: 'Facial Hair', upperWear: 'TOPS', lowerWear: 'BOTTOMS', shoes: 'Shoes',
+
+  Female: 'Female', Male: 'Male', Clean: 'Clean Shaven', Mustache: 'Mustache', Beard: 'Beard',
+
+  hairStyle: 'HAIRSTYLE', hairLength: 'Hair Length', hairColor: 'Hair Color', eyeColor: 'Eye Color',
+
+  height: 'Height', bodyType: 'Body Type',
+
+  'T-shirt': 'T-shirt', 'Shirt': 'Shirt', 'Sweatshirt': 'Sweatshirt', 'Raincoat': 'Raincoat',
+
+  'Jumper': 'Jumper', 'Suit': 'Suit', 'Jacket': 'Jacket', 'Lab coat': 'Lab coat',
+
+  'Police Uniform': 'Police Uniform', 'Firefighter Uniform': 'Firefighter Uniform',
+
+  'Workers Vest': 'Workers Vest', "Worker's Overalls": "Worker's Overalls",
+
+  'Trousers': 'Trousers', 'Jeans': 'Jeans', 'Skirt': 'Skirt', 'Dress': 'Dress',
+
+  'Suit-Pants': 'Suit-Pants', 'Sweatpants': 'Sweatpants',
+
+  'Sneakers': 'Sneakers', 'Boots': 'Boots', 'High heels': 'High heels',
+
+  'Classic': 'Classic', 'Long boots': 'Long boots',
+
+  None: 'Bald', Hat: 'Hat', 'Police Hat': 'Police Hat', 'Firefighter Hat': 'Firefighter Hat',
+
+  'Chef Hat': 'Chef Hat', 'Hard hat': 'Hard hat', 'Stethoscope': 'Stethoscope',
+
+  Gloves: 'Gloves', Watch: 'Watch', Glasses: 'Glasses', Sunglasses: 'Sunglasses',
+
+  Bag: 'Bag', Necklace: 'Necklace', Scarf: 'Scarf', Tie: 'Tie', Earrings: 'Earrings',
+
+  Umbrella: 'Umbrella', Belt: 'Belt', Straight: 'Straight', Wavy: 'Wavy', Curly: 'Curly',
+
+  Short: 'Short', Medium: 'Medium', Long: 'Long', Blonde: 'Blonde', Blond: 'Ash Blond',
+
+  Grey: 'Grey', Dark: 'Black', Brown: 'Brown', Red: 'Red', Green: 'Green', Blue: 'Blue',
+
+  Hazel: 'Hazel', Tall: 'Tall', Average: 'Average', Slim: 'Slim', Fat: 'Fat', Plump: 'Plump'
+
+};
+
+
+
+const INITIAL_CHARACTER = {
+
+  gender: 'Male',
+
+  facialHair: 'Clean',
+
+  upperWear: 'Shirt',
+
+  lowerWear: 'Suit-Pants',
+
+  shoes: 'Classic',
+
+  accessories: [],
+
+  hairStyle: 'Straight',
+
+  hairLength: 'Short',
+
+  hairColor: 'Brown',
+
+  eyeColor: 'Green',
+
+  height: 'Medium',
+
+  bodyType: 'Average'
+
+};
+
+
+
+// Sound Effects Synthesizer - Works without internet, audio files, or Google services!
+
+const playSoundEffect = (type) => {
+
+  try {
+
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioCtx) return;
+
+    const ctx = new AudioCtx();
+
+    if (ctx.state === 'suspended') {
+
+      ctx.resume();
+
+    }
+
+
+
+    const now = ctx.currentTime;
+
+    if (type === 'click') {
+
+      const osc = ctx.createOscillator();
+
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+
+      osc.frequency.setValueAtTime(600, now);
+
+      osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+
+      gain.gain.setValueAtTime(0.15, now);
+
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+      osc.connect(gain);
+
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+
+      osc.stop(now + 0.05);
+
+    } else if (type === 'success') {
+
+      // Cheerful chime (C5 -> E5 -> G5 -> C6)
+
+      const freqs = [523.25, 659.25, 783.99, 1046.50];
+
+      freqs.forEach((f, i) => {
+
+        const osc = ctx.createOscillator();
+
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle';
+
+        osc.frequency.setValueAtTime(f, now + i * 0.08);
+
+        gain.gain.setValueAtTime(0.2, now + i * 0.08);
+
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.25);
+
+        osc.connect(gain);
+
+        gain.connect(ctx.destination);
+
+        osc.start(now + i * 0.08);
+
+        osc.stop(now + i * 0.08 + 0.25);
+
+      });
+
+    } else if (type === 'error') {
+
+      const osc = ctx.createOscillator();
+
+      const gain = ctx.createGain();
+
+      osc.type = 'sawtooth';
+
+      osc.frequency.setValueAtTime(220, now);
+
+      osc.frequency.setValueAtTime(180, now + 0.1);
+
+      gain.gain.setValueAtTime(0.15, now);
+
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+      osc.connect(gain);
+
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+
+      osc.stop(now + 0.25);
+
+    }
+
+  } catch (err) {
+
+    // Graceful fallback if AudioContext is blocked
+
+  }
+
+};
+
+
+
+// Safe Speech Synthesis Engine - Avoids Google Auth / Incognito Speech network errors
+
+const safeSpeak = (text, onStart, onEnd) => {
+
+  try {
+
+    if (!('speechSynthesis' in window)) {
+
+      if (onEnd) onEnd();
+
+      return;
+
+    }
+
+
+
+    window.speechSynthesis.cancel(); // Reset active audio queue
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    utterance.rate = 0.85; // Slower speed ideal for young ESL students
+
+    utterance.pitch = 1.0;
+
+
+
+    // Filter available voices: Prefer local native OS voices to prevent Chrome Incognito online speech failures
+
+    const voices = window.speechSynthesis.getVoices();
+
+    const englishVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+
+    // Pick local offline voice if possible
+
+    const localEnglish = englishVoices.find(v => v.localService) || englishVoices[0] || voices.find(v => v.localService) || voices[0];
+
+    if (localEnglish) {
+
+      utterance.voice = localEnglish;
+
+    }
+
+
+
+    if (onStart) utterance.onstart = onStart;
+
+    if (onEnd) {
+
+      utterance.onend = onEnd;
+
+      utterance.onerror = () => onEnd();
+
+    }
+
+
+
+    window.speechSynthesis.speak(utterance);
+
+  } catch (e) {
+
+    console.warn("Speech API unavailable, falling back to text presentation.", e);
+
+    if (onEnd) onEnd();
+
+  }
+
+};
+
+
+
+class ErrorBoundary extends React.Component {
+
+  constructor(props) {
+
+    super(props);
+
+    this.state = { hasError: false };
+
+  }
+
+  static getDerivedStateFromError() {
+
+    return { hasError: true };
+
+  }
+
+  componentDidCatch(error, errorInfo) {
+
+    console.error("App Error:", error, errorInfo);
+
+  }
+
+  render() {
+
+    if (this.state.hasError) {
+
+      return (
+
+        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-100 p-6 text-center">
+
+          <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md border-4 border-indigo-100">
+
+            <div className="text-5xl mb-4">🎨</div>
+
+            <h1 className="text-2xl font-black text-slate-800 mb-2">Ops! Bir şeyler ters gitti.</h1>
+
+            <p className="text-slate-600 mb-6 text-sm">
+
+              Gizli sekme kısıtlamaları nedeniyle uygulama yenilendi. Giriş yapmanız gerekmez!
+
+            </p>
+
+            <button 
+
+              onClick={() => {
+
+                this.setState({ hasError: false });
+
+                window.location.reload();
+
+              }} 
+
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all text-white rounded-xl font-bold text-sm shadow-lg"
+
+            >
+
+              Uygulamayı Tekrar Başlat
+
+            </button>
+
+          </div>
+
+        </div>
+
+      );
+
+    }
+
+    return this.props.children;
+
+  }
+
+}
+
+
+
+function CharacterApp() {
+
+  const [activeSlot, setActiveSlot] = useState(0);
+
+  const [characters, setCharacters] = useState(() => Array(6).fill(null).map(() => ({ ...INITIAL_CHARACTER })));
+
+  // Game Mode: 'free' (Design Mode) or 'challenge' (Listen & Build Mode)
+
+  const [gameMode, setGameMode] = useState('free'); // 'free' | 'challenge'
+
+  const [difficulty, setDifficulty] = useState('medium'); // 'easy' | 'medium' | 'hard'
+
+  const [targetChar, setTargetChar] = useState(null);
+
+  const [speechPrompt, setSpeechPrompt] = useState('');
+
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+
+  const [showHintText, setShowHintText] = useState(false);
+
+  const [feedback, setFeedback] = useState(null); // { isSuccess: boolean, score: number, details: Array }
+
+  const [score, setScore] = useState(0);
+
+  const [streak, setStreak] = useState(0);
+
+
+
+  const character = characters[activeSlot] || INITIAL_CHARACTER;
+
+
+
+  const updateTrait = (trait, value) => {
+
+    playSoundEffect('click');
+
+    setCharacters(prev => {
+
+      const newChars = [...prev];
+
+      let char = { ...newChars[activeSlot], [trait]: value };
+
+      if (trait === 'gender' && value === 'Male') {
+
+        char.accessories = (char.accessories || []).filter(acc => acc !== 'Earrings');
+
+        if (char.lowerWear === 'Skirt') char.lowerWear = 'Suit-Pants';
+
+        if (char.upperWear === 'Dress') char.upperWear = 'Shirt';
+
+        if (char.shoes === 'High heels') char.shoes = 'Classic';
+
+      }
+
+      if (trait === 'upperWear' && value === 'Suit') {
+
+        char.lowerWear = 'Suit-Pants';
+
+        char.shoes = 'Classic';
+
+      }
+
+      if (trait === 'upperWear' && value === "Worker's Overalls") {
+
+        char.lowerWear = 'Jeans';
+
+      }
+
+      newChars[activeSlot] = char;
+
+      return newChars;
+
+    });
+
+  };
+
+
+
+  const toggleAccessory = (acc) => {
+
+    playSoundEffect('click');
+
+    setCharacters(prev => {
+
+      const newChars = [...prev];
+
+      const char = { ...newChars[activeSlot] };
+
+      const currentAccs = char.accessories || [];
+
+      const isSelected = currentAccs.includes(acc);
+
+      let newAccs = isSelected ? currentAccs.filter(a => a !== acc) : [...currentAccs, acc];
+
+      const hats = ['Hat', 'Police Hat', 'Firefighter Hat', 'Chef Hat', 'Hard hat'];
+
+      if (!isSelected && hats.includes(acc)) {
+
+        newAccs = newAccs.filter(a => !hats.includes(a) || a === acc);
+
+      }
+
+
+
+      char.accessories = newAccs;
+
+      newChars[activeSlot] = char;
+
+      return newChars;
+
+    });
+
+  };
+
+
+
+  const generateRandomCharacter = useCallback(() => {
+
+    const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    const gender = getRandom(OPTIONS.gender);
+
+    const isMale = gender === 'Male';
+
+    const availableUpper = OPTIONS.upperWear.filter(u => !(isMale && u === 'Dress'));
+
+    const upperWear = getRandom(availableUpper);
+
+
+
+    let availableLower = OPTIONS.lowerWear.filter(l => !(isMale && l === 'Skirt'));
+
+    if (upperWear === 'Suit') availableLower = ['Suit-Pants'];
+
+    const lowerWear = getRandom(availableLower);
+
+
+
+    let availableShoes = OPTIONS.shoes.filter(s => !(isMale && s === 'High heels'));
+
+    if (upperWear === 'Suit') availableShoes = ['Classic'];
+
+    const shoes = getRandom(availableShoes);
+
+
+
+    const facialHair = isMale ? getRandom(OPTIONS.facialHair) : 'Clean';
+
+    const hairStyle = isMale ? getRandom(OPTIONS.hairStyle) : getRandom(OPTIONS.hairStyle.filter(s => s !== 'None'));
+
+
+
+    const numAccessories = Math.floor(Math.random() * 2);
+
+    const validAccessories = OPTIONS.accessories.filter(a => !(isMale && a === 'Earrings'));
+
+    const shuffledAccs = [...validAccessories].sort(() => 0.5 - Math.random());
+
+    const hats = ['Hat', 'Police Hat', 'Firefighter Hat', 'Chef Hat', 'Hard hat'];
+
+    const selectedAccs = [];
+
+    let hasHatSelected = false;
+
+
+
+    for (const item of shuffledAccs.slice(0, numAccessories)) {
+
+      if (hats.includes(item)) {
+
+        if (!hasHatSelected) {
+
+          selectedAccs.push(item);
+
+          hasHatSelected = true;
+
+        }
+
+      } else {
+
+        selectedAccs.push(item);
+
+      }
+
+    }
+
+
+
+    return {
+
+      gender,
+
+      facialHair,
+
+      upperWear,
+
+      lowerWear,
+
+      shoes,
+
+      accessories: selectedAccs,
+
+      hairStyle,
+
+      hairLength: getRandom(OPTIONS.hairLength),
+
+      hairColor: getRandom(OPTIONS.hairColor),
+
+      eyeColor: getRandom(OPTIONS.eyeColor),
+
+      height: getRandom(OPTIONS.height),
+
+      bodyType: getRandom(OPTIONS.bodyType)
+
+    };
+
+  }, []);
+
+
+
+  const randomizeCurrentSlot = () => {
+
+    playSoundEffect('click');
+
+    const newChar = generateRandomCharacter();
+
+    setCharacters(prev => {
+
+      const newChars = [...prev];
+
+      newChars[activeSlot] = newChar;
+
+      return newChars;
+
+    });
+
+  };
+
+
+
+  // Generates clean, simple English descriptions suitable for kids
+
+  const createDescriptionFromChar = (char) => {
+
+    const parts = [];
+
+    const pronoun = char.gender === 'Male' ? 'He' : 'She';
+
+    const possessive = char.gender === 'Male' ? 'His' : 'Her';
+
+
+
+    parts.push(`${pronoun} is a ${char.height.toLowerCase()} ${char.gender.toLowerCase()}.`);
+
+
+
+    if (char.hairStyle === 'None') {
+
+      parts.push(`${pronoun} is bald.`);
+
+    } else {
+
+      parts.push(`${pronoun} has ${char.hairLength.toLowerCase()} ${char.hairStyle.toLowerCase()} ${char.hairColor.toLowerCase()} hair.`);
+
+    }
+
+
+
+    parts.push(`${possessive} eyes are ${char.eyeColor.toLowerCase()}.`);
+
+
+
+    if (char.upperWear === 'Dress') {
+
+      parts.push(`${pronoun} is wearing a ${char.upperWear}.`);
+
+    } else {
+
+      parts.push(`${pronoun} is wearing a ${char.upperWear} and ${char.lowerWear}.`);
+
+    }
+
+
+
+    if (char.accessories && char.accessories.length > 0) {
+
+      parts.push(`${pronoun} has a ${char.accessories.join(' and ')}.`);
+
+    }
+
+
+
+    return parts.join(' ');
+
+  };
+
+
+
+  const startNewChallenge = useCallback(() => {
+
+    playSoundEffect('click');
+
+    const newTarget = generateRandomCharacter();
+
+    setTargetChar(newTarget);
+
+    setFeedback(null);
+
+    setShowHintText(false);
+
+
+
+    // Create target audio prompt
+
+    const promptText = createDescriptionFromChar(newTarget);
+
+    setSpeechPrompt(promptText);
+
+
+
+    // Speak automatically
+
+    safeSpeak(
+
+      promptText, 
+
+      () => setIsPlayingAudio(true), 
+
+      () => setIsPlayingAudio(false)
+
+    );
+
+  }, [generateRandomCharacter]);
+
+
+
+  useEffect(() => {
+
+    if (gameMode === 'challenge' && !targetChar) {
+
+      startNewChallenge();
+
+    }
+
+  }, [gameMode, targetChar, startNewChallenge]);
+
+
+
+  const handlePlayAudio = () => {
+
+    playSoundEffect('click');
+
+    if (!speechPrompt) return;
+
+    safeSpeak(
+
+      speechPrompt,
+
+      () => setIsPlayingAudio(true),
+
+      () => setIsPlayingAudio(false)
+
+    );
+
+  };
+
+
+
+  const checkAnswer = () => {
+
+    if (!targetChar) return;
+
+
+
+    const checks = [
+
+      { name: 'Gender', match: character.gender === targetChar.gender, expected: targetChar.gender, current: character.gender },
+
+      { name: 'Height', match: character.height === targetChar.height, expected: targetChar.height, current: character.height },
+
+      { name: 'Hair Color', match: character.hairStyle === 'None' || character.hairColor === targetChar.hairColor, expected: targetChar.hairColor, current: character.hairColor },
+
+      { name: 'Eye Color', match: character.eyeColor === targetChar.eyeColor, expected: targetChar.eyeColor, current: character.eyeColor },
+
+      { name: 'Tops', match: character.upperWear === targetChar.upperWear, expected: targetChar.upperWear, current: character.upperWear },
+
+      { name: 'Bottoms', match: character.upperWear === 'Dress' || character.lowerWear === targetChar.lowerWear, expected: targetChar.lowerWear, current: character.lowerWear }
+
+    ];
+
+
+
+    const correctCount = checks.filter(c => c.match).length;
+
+    const isSuccess = correctCount === checks.length;
+
+
+
+    if (isSuccess) {
+
+      playSoundEffect('success');
+
+      setScore(s => s + 100);
+
+      setStreak(s => s + 1);
+
+    } else {
+
+      playSoundEffect('error');
+
+      setStreak(0);
+
+    }
+
+
+
+    setFeedback({
+
+      isSuccess,
+
+      correctCount,
+
+      totalCount: checks.length,
+
+      checks
+
+    });
+
+  };
+
+
+
+  const isMale = character?.gender === 'Male';
+
+  const hasAccessory = (name) => character?.accessories?.includes(name) || false;
+
+  const hasHat = hasAccessory('Hat');
+
+  const hasPoliceHat = hasAccessory('Police Hat');
+
+  const hasFireHat = hasAccessory('Firefighter Hat');
+
+  const hasChefHat = hasAccessory('Chef Hat');
+
+  const hasHardHat = hasAccessory('Hard hat');
+
+  const hasStethoscope = hasAccessory('Stethoscope');
+
+  const hasGloves = hasAccessory('Gloves');
+
+  const hasWatch = hasAccessory('Watch');
+
+  const hasGlasses = hasAccessory('Glasses');
+
+  const hasSunglasses = hasAccessory('Sunglasses');
+
+  const hasBag = hasAccessory('Bag');
+
+  const hasNecklace = hasAccessory('Necklace');
+
+  const hasScarf = hasAccessory('Scarf');
+
+  const hasTie = hasAccessory('Tie');
+
+  const hasEarrings = hasAccessory('Earrings');
+
+  const hasUmbrella = hasAccessory('Umbrella');
+
+  const hasBelt = hasAccessory('Belt');
+
+  const isDress = character.upperWear === 'Dress';
+
+  const isBald = character.hairStyle === 'None';
+
+
+
+  const torsoHeight = character.height === 'Tall' ? 140 : character.height === 'Medium' ? 110 : 80;
+
+  const upperWearHeight = character.upperWear === 'Raincoat' ? torsoHeight + 30 : torsoHeight;
+
+  const legHeight = character.height === 'Tall' ? 130 : character.height === 'Medium' ? 100 : 70;
+
+  const torsoWidth = character.bodyType === 'Fat' ? 110 : character.bodyType === 'Plump' ? 90 : character.bodyType === 'Average' ? 70 : 50;
+
+  const legWidth = character.bodyType === 'Fat' ? 36 : character.bodyType === 'Plump' ? 28 : character.bodyType === 'Average' ? 22 : 16;
+
+  const armWidth = character.bodyType === 'Fat' ? 18 : character.bodyType === 'Plump' ? 16 : character.bodyType === 'Average' ? 14 : 12;
+
+
+
+  const centerX = 150;
+
+  const headY = 80;
+
+  const neckY = 105;
+
+  const torsoY = 125; 
+
+  const armHeight = torsoHeight * 0.7;
+
+  const pantsY = torsoY + torsoHeight - 15;
+
+  let hairLengthFactor = isMale 
+
+    ? (character.hairLength === 'Short' ? 0.05 : character.hairLength === 'Medium' ? 0.35 : 0.85)
+
+    : (character.hairLength === 'Short' ? 0.05 : character.hairLength === 'Medium' ? 0.25 : 0.7);
+
+
+
+  const hairEndY = torsoY + (torsoHeight * hairLengthFactor);
+
+  const hairColorHex = COLORS.hair[character.hairColor] || '#713f12';
+
+  const eyeColorHex = COLORS.eye[character.eyeColor] || '#16a34a';
+
+
+
+  const Fingers = ({ side }) => {
+
+    const handX = side === 'left' ? centerX - torsoWidth/2 - armWidth + 2 : centerX + torsoWidth/2 - 2;
+
+    const handY = torsoY + 10 + armHeight;
+
+    const fSpace = armWidth / 4;
+
+    const skinColor = hasGloves ? COLORS.clothing.Gloves : COLORS.skin;
+
+
+
+    return (
+
+      <g fill={skinColor}>
+
+        <circle cx={handX + armWidth/2} cy={handY} r={armWidth/2 + 1} />
+
+        {[0, 1, 2, 3].map(i => (
+
+          <rect key={i} x={handX + (i * fSpace)} y={handY} width={fSpace - 1} height="10" rx="2" />
+
+        ))}
+
+        {hasWatch && side === 'left' && (
+
+          <g transform={`translate(${handX}, ${handY - 15})`}>
+
+            <rect x="0" y="0" width={armWidth} height="6" fill={COLORS.clothing.Watch} />
+
+            <circle cx={armWidth/2} cy="3" r="4" fill="#cbd5e1" stroke={COLORS.clothing.Watch} strokeWidth="1" />
+
+          </g>
+
+        )}
+
+      </g>
+
+    );
+
+  };
+
+
+
+  const BackHair = () => {
+
+    if (isBald || hasChefHat) return null;
+
+    if (isMale && character.hairLength !== 'Long') return null;
+
+    if (character.hairStyle === 'Straight') return <rect x={centerX - 40} y={headY - 10} width="80" height={hairEndY - (headY - 10)} rx="5" fill={hairColorHex} />;
+
+    if (character.hairStyle === 'Wavy') return <path d={`M ${centerX - 35} ${headY - 10} C ${centerX - 50} ${headY + 30}, ${centerX - 20} ${hairEndY - 20}, ${centerX - 40} ${hairEndY} L ${centerX + 40} ${hairEndY} C ${centerX + 20} ${hairEndY - 20}, ${centerX + 50} ${headY + 30}, ${centerX + 35} ${headY - 10} Z`} fill={hairColorHex} />;
+
+    if (character.hairStyle === 'Curly') {
+
+      const cy1 = headY + (hairEndY - headY) * 0.3;
+
+      const cy2 = headY + (hairEndY - headY) * 0.7;
+
+      return (
+
+        <g fill={hairColorHex}>
+
+          <rect x={centerX - 35} y={headY - 10} width="70" height={hairEndY - headY} />
+
+          <circle cx={centerX - 35} cy={cy1} r="25" />
+
+          <circle cx={centerX + 35} cy={cy1} r="25" />
+
+          <circle cx={centerX - 38} cy={cy2} r="25" />
+
+          <circle cx={centerX + 38} cy={cy2} r="25" />
+
+        </g>
+
+      );
+
+    }
+
+    return null;
+
+  };
+
+
+
+  const FrontHair = () => {
+
+    if (isBald) return null;
+
+    const isWearingHat = hasHat || hasPoliceHat || hasFireHat || hasChefHat || hasHardHat;
+
+    const hairContainerStyles = isWearingHat ? { clipPath: 'inset(18px 0 0 0)' } : {};
+
+    if (isMale) {
+
+      const len = character.hairLength;
+
+      const topOffset = len === 'Short' ? 35 : len === 'Medium' ? 48 : 58;
+
+      const sideY = len === 'Short' ? headY + 2 : len === 'Medium' ? headY + 12 : headY + 32;
+
+
+
+      return (
+
+        <g style={hairContainerStyles} fill={hairColorHex}>
+
+          {character.hairStyle === 'Straight' && (
+
+            <g>
+
+               <path d={`M ${centerX - 32} ${headY - 12} L ${centerX + 32} ${headY - 12} Q ${centerX + 35} ${headY - topOffset} ${centerX} ${headY - topOffset - 3} Q ${centerX - 35} ${headY - topOffset} ${centerX - 32} ${headY - 12}`} />
+
+               <path d={`M ${centerX - 15} ${headY - topOffset + 4} Q ${centerX - 10} ${headY - topOffset + 2} ${centerX} ${headY - topOffset} L ${centerX - 5} ${headY - 30} Z`} fill="white" opacity="0.1" />
+
+               <path d={`M ${centerX - 32} ${headY - 10} L ${centerX - 32} ${sideY} L ${centerX - 24} ${sideY} Z`} />
+
+               <path d={`M ${centerX + 32} ${headY - 10} L ${centerX + 32} ${sideY} L ${centerX + 24} ${sideY} Z`} />
+
+            </g>
+
+          )}
+
+          {character.hairStyle === 'Wavy' && (
+
+            <g>
+
+              <path d={`M ${centerX - 32} ${headY - 15} Q ${centerX - 45} ${headY - topOffset - 5} ${centerX - 10} ${headY - topOffset + 5} Q ${centerX + 15} ${headY - topOffset - 15} ${centerX + 35} ${headY - topOffset + 5} Q ${centerX + 42} ${headY - topOffset + 10} ${centerX + 32} ${headY - 15} Z`} />
+
+              <path d={`M ${centerX - 32} ${headY - 15} L ${centerX - 32} ${sideY} L ${centerX - 25} ${sideY} Z`} />
+
+              <path d={`M ${centerX + 32} ${headY - 15} L ${centerX + 32} ${sideY} L ${centerX + 25} ${sideY} Z`} />
+
+            </g>
+
+          )}
+
+          {character.hairStyle === 'Curly' && (
+
+            <g>
+
+              <circle cx={centerX - 24} cy={headY - 20} r="10" />
+
+              <circle cx={centerX - 12} cy={headY - 32} r="11" />
+
+              <circle cx={centerX + 12} cy={headY - 32} r="11" />
+
+              <circle cx={centerX + 24} cy={headY - 20} r="10" />
+
+              <circle cx={centerX} cy={headY - 36} r="12" />
+
+            </g>
+
+          )}
+
+        </g>
+
+      );
+
+    }
+
+
+
+    return (
+
+      <g style={hairContainerStyles}>
+
+        {character.hairStyle === 'Straight' && <path d={`M ${centerX - 40} ${headY} C ${centerX - 40} ${headY - 50}, ${centerX + 40} ${headY - 50}, ${centerX + 40} ${headY} L ${centerX + 30} ${headY - 15} Q ${centerX} ${headY - 30} ${centerX - 30} ${headY - 15} Z`} fill={hairColorHex} />}
+
+        {character.hairStyle === 'Wavy' && <path d={`M ${centerX - 40} ${headY} C ${centerX - 40} ${headY - 50}, ${centerX + 40} ${headY - 50}, ${centerX + 40} ${headY} Q ${centerX + 25} ${headY - 25} ${centerX + 10} ${headY - 15} Q ${centerX - 10} ${headY - 25} ${centerX - 40} ${headY} Z`} fill={hairColorHex} />}
+
+        {character.hairStyle === 'Curly' && (
+
+          <g fill={hairColorHex}>
+
+            <circle cx={centerX - 25} cy={headY - 25} r="18" />
+
+            <circle cx={centerX} cy={headY - 35} r="20" />
+
+            <circle cx={centerX + 25} cy={headY - 25} r="18" />
+
+          </g>
+
+        )}
+
+      </g>
+
+    );
+
+  };
+
+
+
+  return (
+
+    <div className="min-h-screen bg-slate-100 p-3 sm:p-6 font-sans text-slate-800">
+
+      <div className="max-w-6xl mx-auto space-y-6">
+
+        {/* Header Navigation & Classroom Mode Switcher */}
+
+        <header className="bg-white rounded-3xl p-4 sm:p-6 shadow-md border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+
+          <div>
+
+            <span className="inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-black tracking-wider uppercase mb-1">
+
+              Classroom English Activity
+
+            </span>
+
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+
+              {gameMode === 'challenge' ? '🎧 LISTEN AND BUILD THE CHARACTER' : '🎨 CHARACTER CREATOR & DESIGN'}
+
+            </h1>
+
+            <p className="text-xs text-slate-500 font-medium">
+
+              Giriş yapmanız gerekmez. Gizli sekme ve tüm tarayıcılarda 100% ücretsiz çalışır.
+
+            </p>
+
+          </div>
+
+
+
+          {/* Mode Selector Tabs */}
+
+          <div className="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-2xl w-full md:w-auto justify-center">
+
+            <button
+
+              onClick={() => {
+
+                playSoundEffect('click');
+
+                setGameMode('challenge');
+
+              }}
+
+              className={`px-4 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${
+
+                gameMode === 'challenge'
+
+                  ? 'bg-indigo-600 text-white shadow-md'
+
+                  : 'text-slate-600 hover:text-slate-900'
+
+              }`}
+
+            >
+
+              <span className="text-base">🎧</span> Listen & Build Game
+
+            </button>
+
+            <button
+
+              onClick={() => {
+
+                playSoundEffect('click');
+
+                setGameMode('free');
+
+              }}
+
+              className={`px-4 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${
+
+                gameMode === 'free'
+
+                  ? 'bg-indigo-600 text-white shadow-md'
+
+                  : 'text-slate-600 hover:text-slate-900'
+
+              }`}
+
+            >
+
+              <span className="text-base">🎨</span> Free Design
+
+            </button>
+
+          </div>
+
+        </header>
+
+
+
+        {/* Listen & Build Challenge Control Panel */}
+
+        {gameMode === 'challenge' && (
+
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-indigo-400">
+
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+
+              <div className="flex items-center gap-4 w-full md:w-auto">
+
+                <button
+
+                  onClick={handlePlayAudio}
+
+                  disabled={isPlayingAudio}
+
+                  className={`px-6 py-4 rounded-2xl font-black text-sm flex items-center gap-3 transition-all shadow-xl active:scale-95 ${
+
+                    isPlayingAudio
+
+                      ? 'bg-amber-400 text-slate-900 animate-pulse'
+
+                      : 'bg-white text-indigo-700 hover:bg-slate-50'
+
+                  }`}
+
+                >
+
+                  <span className="text-2xl">{isPlayingAudio ? '🔊' : '▶️'}</span>
+
+                  <div className="text-left">
+
+                    <div className="leading-none">{isPlayingAudio ? 'Speaking...' : 'Listen Audio'}</div>
+
+                    <div className="text-[10px] opacity-75 font-normal mt-0.5">Click to hear English speech</div>
+
+                  </div>
+
+                </button>
+
+
+
+                <button
+
+                  onClick={() => setShowHintText(!showHintText)}
+
+                  className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs border border-white/20 transition-all"
+
+                >
+
+                  {showHintText ? '👁️ Hide Text' : '👁️ Show Text Hint'}
+
+                </button>
+
+              </div>
+
+
+
+              {/* Score & Streak counter */}
+
+              <div className="flex items-center gap-4 bg-white/10 px-5 py-3 rounded-2xl border border-white/20 text-center sm:text-right">
+
+                <div>
+
+                  <div className="text-[10px] font-bold opacity-80 uppercase tracking-widest">SCORE</div>
+
+                  <div className="text-xl font-black text-amber-300">{score} pts</div>
+
+                </div>
+
+                <div className="h-8 w-px bg-white/20" />
+
+                <div>
+
+                  <div className="text-[10px] font-bold opacity-80 uppercase tracking-widest">STREAK</div>
+
+                  <div className="text-xl font-black text-emerald-300">🔥 {streak}</div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+
+            {/* Optional Hint Text Display */}
+
+            {showHintText && (
+
+              <div className="mt-4 p-4 bg-white/10 rounded-2xl border border-white/20 text-sm font-medium leading-relaxed italic">
+
+                "{speechPrompt}"
+
+              </div>
+
+            )}
+
+          </div>
+
+        )}
+
+
+
+        {/* Main Content Area */}
+
+        <div className="flex flex-col md:flex-row gap-6">
+
+          {/* Character Preview Canvas Column */}
+
+          <div className="w-full md:w-5/12 lg:w-1/3 flex-shrink-0">
+
+            <div className="bg-white rounded-3xl shadow-xl overflow-hidden sticky top-6 border-4 border-white">
+
+              {/* Slot Switcher in Free Mode */}
+
+              {gameMode === 'free' && (
+
+                <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+
+                  <div className="flex p-1 bg-slate-200/60 rounded-xl">
+
+                    {characters.map((_, i) => (
+
+                      <button
+
+                        key={i}
+
+                        onClick={() => {
+
+                          playSoundEffect('click');
+
+                          setActiveSlot(i);
+
+                        }}
+
+                        className={`w-8 h-8 rounded-lg font-black text-xs transition-all ${
+
+                          activeSlot === i
+
+                            ? 'bg-indigo-600 text-white shadow-sm'
+
+                            : 'text-slate-500 hover:text-slate-800'
+
+                        }`}
+
+                      >
+
+                        #{i + 1}
+
+                      </button>
+
+                    ))}
+
+                  </div>
+
+
+
+                  <button
+
+                    onClick={randomizeCurrentSlot}
+
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all"
+
+                  >
+
+                    🎲 Random
+
+                  </button>
+
+                </div>
+
+              )}
+
+
+
+              <div className="w-full aspect-[3/4] flex flex-col items-center justify-center bg-slate-200/60 p-4">
+
+                <svg viewBox="0 0 300 450" className="w-full h-full drop-shadow-md">
+
+                  <BackHair />
+
+                  {isDress ? (
+
+                    <g>
+
+                      <rect x={centerX - torsoWidth/4 - legWidth/2} y={pantsY} width={legWidth} height={legHeight} rx="4" fill={COLORS.skin} />
+
+                      <rect x={centerX + torsoWidth/4 - legWidth/2} y={pantsY} width={legWidth} height={legHeight} rx="4" fill={COLORS.skin} />
+
+                      <path d={`M ${centerX - torsoWidth/2} ${pantsY} L ${centerX + torsoWidth/2} ${pantsY} L ${centerX + torsoWidth/1.2} ${pantsY + legHeight/1.5} L ${centerX - torsoWidth/1.2} ${pantsY + legHeight/1.5} Z`} fill={COLORS.clothing.Dress} />
+
+                    </g>
+
+                  ) : (character.lowerWear === 'Skirt' && !isMale) ? (
+
+                    <g>
+
+                      <rect x={centerX - torsoWidth/4 - legWidth/2} y={pantsY} width={legWidth} height={legHeight} rx="4" fill={COLORS.skin} />
+
+                      <rect x={centerX + torsoWidth/4 - legWidth/2} y={pantsY} width={legWidth} height={legHeight} rx="4" fill={COLORS.skin} />
+
+                      <path d={`M ${centerX - torsoWidth/2} ${pantsY} L ${centerX + torsoWidth/2} ${pantsY} L ${centerX + torsoWidth/1.5} ${pantsY + legHeight/1.5} L ${centerX - torsoWidth/1.5} ${pantsY + legHeight/1.5} Z`} fill={COLORS.clothing.Skirt} />
+
+                    </g>
+
+                  ) : (
+
+                    <>
+
+                      <rect x={centerX - torsoWidth/4 - legWidth/2} y={pantsY} width={legWidth} height={legHeight} rx="4" fill={COLORS.clothing[character.lowerWear] || '#334155'} />
+
+                      <rect x={centerX + torsoWidth/4 - legWidth/2} y={pantsY} width={legWidth} height={legHeight} rx="4" fill={COLORS.clothing[character.lowerWear] || '#334155'} />
+
+                    </>
+
+                  )}
+
+                  {/* Shoes */}
+
+                  <g>
+
+                    {['left', 'right'].map(side => {
+
+                      const xPos = side === 'left' ? centerX - torsoWidth/4 - legWidth/2 - 4 : centerX + torsoWidth/4 - legWidth/2 - 4;
+
+                      const yBase = pantsY + legHeight - 12;
+
+                      const shoeColor = COLORS.shoes[character.shoes] || '#171717';
+
+                      const sWidth = legWidth + 8;
+
+
+
+                      return <rect key={side} x={xPos} y={yBase} width={sWidth} height="14" rx="6" fill={shoeColor} />;
+
+                    })}
+
+                  </g>
+
+
+
+                  {/* Arms */}
+
+                  <g>
+
+                    <rect x={centerX - torsoWidth/2 - armWidth + 2} y={torsoY + 15} width={armWidth} height={armHeight} rx={armWidth/2} fill={COLORS.skin} />
+
+                    <rect x={centerX + torsoWidth/2 - 2} y={torsoY + 15} width={armWidth} height={armHeight} rx={armWidth/2} fill={COLORS.skin} />
+
+                  </g>
+
+
+
+                  <Fingers side="left" />
+
+                  <Fingers side="right" />
+
+
+
+                  {/* Upper Wear */}
+
+                  <g>
+
+                    <path 
+
+                      d={`M ${centerX - torsoWidth/2} ${torsoY + 20} Q ${centerX - torsoWidth/2} ${torsoY} ${centerX} ${torsoY} Q ${centerX + torsoWidth/2} ${torsoY} ${centerX + torsoWidth/2} ${torsoY + 20} V ${torsoY + upperWearHeight} H ${centerX - torsoWidth/2} Z`} 
+
+                      fill={isDress ? COLORS.clothing.Dress : (COLORS.clothing[character.upperWear] || '#3b82f6')} 
+
+                    />
+
+                  </g>
+
+
+
+                  <rect x={centerX - 8} y={neckY} width="16" height="30" fill={COLORS.skin} />
+
+                  {/* Head & Face */}
+
+                  <g fill={COLORS.skin}>
+
+                    <circle cx={centerX - 30} cy={headY + 5} r="7" />
+
+                    <circle cx={centerX + 30} cy={headY + 5} r="7" />
+
+                    <circle cx={centerX} cy={headY} r="35" />
+
+                  </g>
+
+
+
+                  {/* Eyes */}
+
+                  <circle cx={centerX - 13} cy={headY - 4} r="6" fill="white" />
+
+                  <circle cx={centerX - 13} cy={headY - 4} r="3.5" fill={eyeColorHex} />
+
+                  <circle cx={centerX + 13} cy={headY - 4} r="6" fill="white" />
+
+                  <circle cx={centerX + 13} cy={headY - 4} r="3.5" fill={eyeColorHex} />
+
+
+
+                  {/* Accessories: Glasses */}
+
+                  {(hasGlasses || hasSunglasses) && (
+
+                    <g stroke={hasSunglasses ? "none" : COLORS.clothing.Glasses} strokeWidth="2" fill={hasSunglasses ? COLORS.clothing.Sunglasses : "none"}>
+
+                      <rect x={centerX - 23} y={headY - 10} width="16" height="11" rx="2" />
+
+                      <rect x={centerX + 7} y={headY - 10} width="16" height="11" rx="2" />
+
+                    </g>
+
+                  )}
+
+
+
+                  {/* Mouth */}
+
+                  <path d={`M ${centerX - 10} ${headY + 20} Q ${centerX} ${headY + 26} ${centerX + 10} ${headY + 20}`} fill="none" stroke="#be123c" strokeWidth="2" strokeLinecap="round" />
+
+
+
+                  <FrontHair />
+
+
+
+                  {/* Hats */}
+
+                  {hasHat && (
+
+                    <g fill={COLORS.clothing.Hat}>
+
+                       <rect x={centerX - 50} y={headY - 15} width="100" height="8" rx="4" />
+
+                       <path d={`M ${centerX - 30} ${headY - 15} A 30 30 0 0 1 ${centerX + 30} ${headY - 15} Z`} />
+
+                    </g>
+
+                  )}
+
+                  {hasPoliceHat && (
+
+                    <g fill={COLORS.clothing['Police Hat']}>
+
+                      <path d={`M ${centerX - 42} ${headY - 35} A 42 25 0 0 1 ${centerX + 42} ${headY - 35} V ${headY - 15} H ${centerX - 42} Z`} />
+
+                      <rect x={centerX - 46} y={headY - 15} width="92" height="6" rx="2" fill="#1e2937" />
+
+                    </g>
+
+                  )}
+
+                </svg>
+
+
+
+                <div className="mt-3 flex gap-3 w-full justify-center">
+
+                  <div className="bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center">
+
+                    <span className="text-[9px] font-bold text-slate-400 uppercase">HEIGHT</span>
+
+                    <span className="text-sm font-black text-indigo-700">{METRICS.height[character.height]}</span>
+
+                  </div>
+
+                  <div className="bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center">
+
+                    <span className="text-[9px] font-bold text-slate-400 uppercase">WEIGHT</span>
+
+                    <span className="text-sm font-black text-indigo-700">{METRICS.weight[character.bodyType]}</span>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+
+              {/* Action Button for Challenge Mode */}
+
+              {gameMode === 'challenge' && (
+
+                <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col gap-2">
+
+                  <button
+
+                    onClick={checkAnswer}
+
+                    className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+
+                  >
+
+                    <span>✓</span> Check Answer!
+
+                  </button>
+
+                  <button
+
+                    onClick={startNewChallenge}
+
+                    className="w-full py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition-all"
+
+                  >
+
+                    ⏭️ Skip / Next Character
+
+                  </button>
+
+                </div>
+
+              )}
+
+            </div>
+
+          </div>
+
+
+
+          {/* Options & Controls Panel Column */}
+
+          <div className="w-full md:w-7/12 lg:w-2/3">
+
+            {/* Feedback Modal Banner */}
+
+            {feedback && (
+
+              <div className={`mb-6 p-5 rounded-3xl border-2 shadow-lg ${
+
+                feedback.isSuccess 
+
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-900' 
+
+                  : 'bg-amber-50 border-amber-300 text-amber-900'
+
+              }`}>
+
+                <div className="flex items-center justify-between mb-3">
+
+                  <div className="flex items-center gap-3">
+
+                    <span className="text-3xl">{feedback.isSuccess ? '🎉' : '💡'}</span>
+
+                    <div>
+
+                      <h3 className="font-black text-lg">
+
+                        {feedback.isSuccess ? 'PERFECT MATCH! (TEBRİKLER!)' : 'ALMOST THERE! (TEKRAR DİNLE)'}
+
+                      </h3>
+
+                      <p className="text-xs font-medium opacity-80">
+
+                        {feedback.correctCount} of {feedback.totalCount} traits correct
+
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                  {feedback.isSuccess && (
+
+                    <button
+
+                      onClick={startNewChallenge}
+
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md"
+
+                    >
+
+                      Next Character ➔
+
+                    </button>
+
+                  )}
+
+                </div>
+
+
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+
+                  {feedback.checks.map((check, idx) => (
+
+                    <div key={idx} className={`p-2 rounded-xl text-xs font-bold border ${
+
+                      check.match ? 'bg-emerald-100/80 border-emerald-300 text-emerald-800' : 'bg-rose-100/80 border-rose-300 text-rose-800'
+
+                    }`}>
+
+                      <div>{check.match ? '✓' : '✗'} {check.name}</div>
+
+                      <div className="text-[10px] font-normal opacity-80">
+
+                        Target: {check.expected}
+
+                      </div>
+
+                    </div>
+
+                  ))}
+
+                </div>
+
+              </div>
+
+            )}
+
+
+
+            <div className="bg-white rounded-3xl shadow-md p-5 sm:p-6 border border-slate-200">
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                {/* Column 1: Identity & Body */}
+
+                <div className="space-y-5">
+
+                  <section>
+
+                    <h3 className="text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider">Identity & Structure</h3>
+
+                    <div className="space-y-3">
+
+                      <div>
+
+                        <label className="text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase">GENDER</label>
+
+                        <div className="flex gap-1.5">
+
+                          {OPTIONS.gender.map(g => (
+
+                            <button 
+
+                              key={g} 
+
+                              onClick={() => updateTrait('gender', g)} 
+
+                              className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
+
+                                character.gender === g 
+
+                                  ? 'bg-indigo-600 border-indigo-700 text-white shadow-sm' 
+
+                                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+
+                              }`}
+
+                            >
+
+                              {TRANSLATIONS[g]}
+
+                            </button>
+
+                          ))}
+
+                        </div>
+
+                      </div>
+
+
+
+                      <div className="grid grid-cols-2 gap-3">
+
+                        <div>
+
+                          <label className="text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase">HEIGHT</label>
+
+                          <div className="flex flex-col gap-1">
+
+                            {OPTIONS.height.map(h => (
+
+                              <button 
+
+                                key={h} 
+
+                                onClick={() => updateTrait('height', h)} 
+
+                                className={`py-1.5 rounded-lg text-xs font-bold border transition-all ${
+
+                                  character.height === h 
+
+                                    ? 'bg-indigo-600 border-indigo-700 text-white' 
+
+                                    : 'bg-slate-50 border-slate-200 text-slate-600'
+
+                                }`}
+
+                              >
+
+                                {TRANSLATIONS[h]}
+
+                              </button>
+
+                            ))}
+
+                          </div>
+
+                        </div>
+
+
+
+                        <div>
+
+                          <label className="text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase">BODY TYPE</label>
+
+                          <div className="flex flex-col gap-1">
+
+                            {OPTIONS.bodyType.map(b => (
+
+                              <button 
+
+                                key={b} 
+
+                                onClick={() => updateTrait('bodyType', b)} 
+
+                                className={`py-1.5 rounded-lg text-xs font-bold border transition-all ${
+
+                                  character.bodyType === b 
+
+                                    ? 'bg-indigo-600 border-indigo-700 text-white' 
+
+                                    : 'bg-slate-50 border-slate-200 text-slate-600'
+
+                                }`}
+
+                              >
+
+                                {TRANSLATIONS[b]}
+
+                              </button>
+
+                            ))}
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </section>
+
+
+
+                  <section>
+
+                    <h3 className="text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider">Hair & Colors</h3>
+
+                    <div className="space-y-3">
+
+                      <div>
+
+                        <label className="text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase">HAIRSTYLE</label>
+
+                        <div className="grid grid-cols-2 gap-1.5">
+
+                          {OPTIONS.hairStyle.map(s => {
+
+                            if (s === 'None' && character.gender === 'Female') return null;
+
+                            return (
+
+                              <button 
+
+                                key={s} 
+
+                                onClick={() => updateTrait('hairStyle', s)} 
+
+                                className={`py-1.5 rounded-lg text-xs font-bold border transition-all ${
+
+                                  character.hairStyle === s 
+
+                                    ? 'bg-indigo-600 border-indigo-700 text-white' 
+
+                                    : 'bg-slate-50 border-slate-200 text-slate-600'
+
+                                }`}
+
+                              >
+
+                                {TRANSLATIONS[s]}
+
+                              </button>
+
+                            );
+
+                          })}
+
+                        </div>
+
+                      </div>
+
+
+
+                      <div className="grid grid-cols-2 gap-3">
+
+                        <div>
+
+                          <label className="text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase">HAIR COLOR</label>
+
+                          <div className="flex gap-1.5 flex-wrap">
+
+                            {OPTIONS.hairColor.map(c => (
+
+                              <button 
+
+                                key={c} 
+
+                                onClick={() => updateTrait('hairColor', c)} 
+
+                                className={`w-7 h-7 rounded-full border-2 transition-all ${
+
+                                  character.hairColor === c ? 'border-indigo-600 scale-110 shadow-md' : 'border-white shadow-sm'
+
+                                }`} 
+
+                                style={{ backgroundColor: COLORS.hair[c] }} 
+
+                              />
+
+                            ))}
+
+                          </div>
+
+                        </div>
+
+
+
+                        <div>
+
+                          <label className="text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase">EYE COLOR</label>
+
+                          <div className="flex gap-1.5 flex-wrap">
+
+                            {OPTIONS.eyeColor.map(c => (
+
+                              <button 
+
+                                key={c} 
+
+                                onClick={() => updateTrait('eyeColor', c)} 
+
+                                className={`w-7 h-7 rounded-full border-2 transition-all ${
+
+                                  character.eyeColor === c ? 'border-indigo-600 scale-110 shadow-md' : 'border-white shadow-sm'
+
+                                }`} 
+
+                                style={{ backgroundColor: COLORS.eye[c] }} 
+
+                              />
+
+                            ))}
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </section>
+
+                </div>
+
+
+
+                {/* Column 2: Clothing & Accessories */}
+
+                <div className="space-y-5">
+
+                  <section>
+
+                    <h3 className="text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider">Clothing</h3>
+
+                    <div className="space-y-3">
+
+                      <div>
+
+                        <label className="text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase">TOPS</label>
+
+                        <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
+
+                          {OPTIONS.upperWear.map(u => {
+
+                            if (u === 'Dress' && character.gender === 'Male') return null;
+
+                            return (
+
+                              <button 
+
+                                key={u} 
+
+                                onClick={() => updateTrait('upperWear', u)} 
+
+                                className={`py-1.5 rounded-lg text-xs font-bold border transition-all ${
+
+                                  character.upperWear === u 
+
+                                    ? 'bg-indigo-600 border-indigo-700 text-white' 
+
+                                    : 'bg-slate-50 border-slate-200 text-slate-600'
+
+                                }`}
+
+                              >
+
+                                {TRANSLATIONS[u]}
+
+                              </button>
+
+                            );
+
+                          })}
+
+                        </div>
+
+                      </div>
+
+
+
+                      <div>
+
+                        <label className="text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase">BOTTOMS</label>
+
+                        <div className="grid grid-cols-2 gap-1.5">
+
+                          {OPTIONS.lowerWear.map(l => {
+
+                            if (l === 'Skirt' && character.gender === 'Male') return null;
+
+                            return (
+
+                              <button 
+
+                                key={l} 
+
+                                onClick={() => updateTrait('lowerWear', l)} 
+
+                                className={`py-1.5 rounded-lg text-xs font-bold border ${
+
+                                  character.lowerWear === l 
+
+                                    ? 'bg-indigo-600 border-indigo-700 text-white' 
+
+                                    : 'bg-slate-50 border-slate-200 text-slate-600'
+
+                                }`}
+
+                              >
+
+                                {TRANSLATIONS[l]}
+
+                              </button>
+
+                            );
+
+                          })}
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </section>
+
+
+
+                  <section>
+
+                    <h3 className="text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider">Accessories & Hats</h3>
+
+                    <div>
+
+                      <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
+
+                        {OPTIONS.accessories.map(acc => {
+
+                          if (acc === 'Earrings' && character.gender !== 'Female') return null;
+
+                          const selected = hasAccessory(acc);
+
+                          return (
+
+                            <button 
+
+                              key={acc} 
+
+                              onClick={() => toggleAccessory(acc)} 
+
+                              className={`py-1.5 rounded-lg text-xs font-bold border transition-all ${
+
+                                selected 
+
+                                  ? 'bg-amber-500 border-amber-600 text-white shadow-sm' 
+
+                                  : 'bg-slate-50 border-slate-200 text-slate-600'
+
+                              }`}
+
+                            >
+
+                              {selected ? '✓ ' : ''}{TRANSLATIONS[acc]}
+
+                            </button>
+
+                          );
+
+                        })}
+
+                      </div>
+
+                    </div>
+
+                  </section>
+
+                </div>
+
+
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+  );
+
+}
+
+
+
+export default function App() {
+
+  return (
+
+    <ErrorBoundary>
+
+      <CharacterApp />
+
+    </ErrorBoundary>
+
+  );
+
+}
