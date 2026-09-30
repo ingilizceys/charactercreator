@@ -1,1560 +1,41 @@
 <!doctype html>
-<html lang="en" data-visualize-standalone>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Character Game</title>
-<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit}iframe{display:block;width:100%;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Character Creator & Listening Game</title>
+<style>body{margin:0;background:#f1f5f9;font-family:Arial,sans-serif}.audio-settings{padding:16px;background:white;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.audio-settings select{max-width:100%;padding:10px;font:inherit}.audio-settings label{font-weight:600}#speech-status{color:#9f1239}</style>
 </head>
 <body>
-<iframe id="codex-visualization" sandbox="allow-scripts" referrerpolicy="no-referrer" title="Character Game" data-srcdoc="&lt;!doctype html&gt;
-&lt;html lang=&quot;en&quot; data-visualize-standalone&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;utf-8&quot;&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
-&lt;meta name=&quot;referrer&quot; content=&quot;no-referrer&quot;&gt;
-&lt;meta http-equiv=&quot;Content-Security-Policy&quot; content=&quot;default-src &#x27;none&#x27;; script-src &#x27;unsafe-inline&#x27; &#x27;unsafe-eval&#x27; &#x27;wasm-unsafe-eval&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src &#x27;unsafe-inline&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src &#x27;none&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;&quot;&gt;
-&lt;title&gt;Character Game&lt;/title&gt;
-&lt;style&gt;:root {
-  color-scheme: light dark;
-  background-color: var(
-    --background,
-    var(--color-background-primary, light-dark(rgb(255 255 255), rgb(24 24 24)))
-  ) !important;
-
-  /* Agent-facing contract; keep in sync with SKILL.md. */
-  --background: var(
-    --color-background-primary,
-    light-dark(rgb(255 255 255), rgb(24 24 24))
-  );
-  --foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --card: color-mix(in oklab, var(--foreground) 5%, var(--background));
-  --card-foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --popover: var(
-    --color-background-secondary,
-    light-dark(rgb(255 255 255), rgb(45 45 45))
-  );
-  --popover-foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --primary: var(
-    --color-text-info,
-    light-dark(rgb(51 156 255), rgb(131 195 255))
-  );
-  --primary-foreground: var(
-    --color-text-inverse,
-    light-dark(rgb(255 255 255), rgb(13 13 13))
-  );
-  --secondary: var(
-    --color-background-secondary,
-    light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%))
-  );
-  --secondary-foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
-  --muted-foreground: var(
-    --color-text-secondary,
-    light-dark(rgb(26 28 31 / 49.4%), rgb(255 255 255 / 49.8%))
-  );
-  --accent: var(
-    --color-background-info,
-    light-dark(rgb(229 242 255), rgb(13 39 63))
-  );
-  --accent-foreground: var(
-    --color-text-info,
-    light-dark(rgb(51 156 255), rgb(131 195 255))
-  );
-  --destructive: var(
-    --color-text-warning,
-    light-dark(rgb(226 85 7), rgb(255 133 73))
-  );
-  --border: var(
-    --color-border-secondary,
-    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
-  );
-  --input: var(
-    --color-border-primary,
-    light-dark(
-      rgb(26 28 31 / 11.8%),
-      color-mix(in oklab, rgb(0 0 0) 10%, transparent)
-    )
-  );
-  --ring: var(
-    --color-ring-primary,
-    light-dark(rgb(51 156 255), rgb(131 195 255 / 76%))
-  );
-  --font-size-base: var(--font-text-md-size, 14px);
-  --blue: light-dark(rgb(51 156 255), rgb(51 156 255));
-  --orange: light-dark(rgb(226 85 7), rgb(251 106 34));
-  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
-  --red: light-dark(rgb(224 46 42), rgb(255 103 100));
-  --purple: light-dark(rgb(146 79 247), rgb(173 123 249));
-  --yellow: light-dark(rgb(255 195 0), rgb(255 210 64));
-  --viz-series-1: var(--primary);
-  --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
-  --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
-  --viz-series-4: light-dark(rgb(235 119 177), rgb(240 143 192));
-  --viz-series-5: light-dark(rgb(155 121 236), rgb(170 145 239));
-  --viz-series-6: light-dark(rgb(58 185 177), rgb(90 203 194));
-
-  /* Internal implementation variables; not part of the agent contract. */
-  --font-sans: -apple-system, system-ui, &quot;Segoe UI&quot;, sans-serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;,
-    monospace;
-  --font-size-normal: max(11px, var(--font-size-base));
-  --font-size-tooltip: calc(var(--font-size-base) - 1px);
-  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
-  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
-  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
-  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
-  --font-weight-normal: 430;
-  --font-weight-medium: 500;
-  --icon-size: 16px;
-  --line-height-normal: calc(var(--font-size-normal) * 1.5);
-  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
-  --line-height-small: calc(var(--font-size-small) + 4px);
-  --corner-shape: round;
-  --radius: var(--border-radius-lg, 10px);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-2xl: calc(var(--radius) * 1.6);
-  --radius-full: 9999px;
-  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
-  --checkmark-image: url(&quot;data:image/svg+xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27; viewBox=&#x27;0 0 17 17&#x27;%3E%3Cpath d=&#x27;M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z&#x27;/%3E%3C/svg%3E&quot;);
-
-  /* Legacy aliases; not part of the current agent contract. */
-  --viz-bg: transparent;
-  --viz-panel: var(--card);
-  --viz-border: var(--border);
-  --viz-text: var(--foreground);
-  --viz-muted: var(--muted-foreground);
-  --viz-accent: var(--primary);
-  --viz-accent-text: var(--primary-foreground);
-  --viz-accent-bg: var(--accent);
-  --viz-font-size: var(--font-size-base);
-  --viz-warning: var(--destructive);
-}
-
-:root[data-theme=&quot;light&quot;] {
-  color-scheme: light;
-}
-
-:root[data-theme=&quot;dark&quot;] {
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html &gt; body {
-  /* Preserve MCP aliases for older inline renderers without creating :root cycles. */
-  --color-background-primary: var(
-    --background,
-    light-dark(rgb(255 255 255), rgb(24 24 24))
-  );
-  --color-text-primary: var(
-    --foreground,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --color-border-secondary: var(
-    --border,
-    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
-  );
-
-  margin: 0;
-  padding: var(--visualize-paint-gutter, 0px);
-  color: var(--foreground);
-  background: transparent !important;
-  font-family: var(--font-sans) !important;
-  font-size: var(--font-size-normal);
-  font-weight: var(--font-weight-normal);
-  line-height: var(--line-height-normal);
-}
-
-:root:not([data-app-block-surface], [data-visualize-standalone]) &gt; body {
-  padding: 12px;
-}
-
-.cursor-interaction {
-  cursor: var(--cursor-interaction, pointer);
-}
-
-a {
-  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
-  cursor: var(--cursor-interaction, pointer);
-  font-weight: var(--font-weight-medium, 500);
-  text-decoration: none;
-  text-underline-offset: 2px;
-}
-
-a:is(:hover, :focus-visible) {
-  text-decoration-line: underline;
-  text-decoration-style: dashed;
-  text-decoration-thickness: 0.5px;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p {
-  margin-block: 0;
-}
-
-h1 {
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-}
-
-h2 {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-}
-
-h3,
-h4,
-h5,
-h6 {
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.3;
-}
-
-b,
-strong,
-th {
-  font-weight: var(--font-weight-medium);
-}
-
-code:not(pre code) {
-  display: inline;
-  padding: 1px 6px;
-  border-radius: var(--radius-sm);
-  corner-shape: var(--corner-shape);
-  background: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 0.92em;
-  overflow-wrap: anywhere;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  word-break: break-word;
-}
-
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  color: var(--foreground);
-  font: inherit;
-  text-align: start;
-}
-
-.table :is(th, td) {
-  padding-block: 10px;
-  padding-inline: 0 24px;
-  overflow-wrap: anywhere;
-  border-bottom: 1px solid var(--border);
-  text-align: start;
-  vertical-align: top;
-}
-
-.table-responsive &gt; .table :is(th, td) {
-  overflow-wrap: break-word;
-}
-
-.table :is(th, td):last-child {
-  padding-inline-end: 0;
-}
-
-.table :is(caption, thead th) {
-  font-weight: 600;
-}
-
-.table thead th {
-  padding-block: 8px;
-  border-bottom-color: color-mix(in srgb, var(--foreground) 16%, transparent);
-}
-
-.table tbody tr:last-child :is(th, td) {
-  border-bottom: 0;
-}
-
-.table.table-sm :is(th, td) {
-  padding-block: 6px;
-}
-
-.table.table-sm :is(th, td):not(:last-child) {
-  padding-inline-end: 16px;
-}
-
-.table :is(.text-end, [align=&quot;right&quot;]) {
-  text-align: end;
-  font-variant-numeric: tabular-nums;
-}
-
-.table :is(.text-center, [align=&quot;center&quot;]) {
-  text-align: center;
-}
-
-.table .text-nowrap {
-  white-space: nowrap;
-}
-
-#widget {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  padding: 0;
-  background: transparent !important;
-}
-
-.card {
-  min-width: 0;
-  padding: 12px;
-  overflow: hidden;
-  overflow-wrap: break-word;
-  border-radius: var(--radius-2xl);
-  corner-shape: var(--corner-shape);
-  color: var(--card-foreground);
-  background: var(--card);
-}
-
-.widget {
-  min-width: 0;
-  overflow: hidden;
-  border: 0;
-  border-radius: var(--radius-lg);
-  corner-shape: var(--corner-shape);
-  box-shadow: 0 0 0 0.5px var(--border-strong, var(--border));
-  color: var(--foreground);
-  background: var(--background);
-}
-
-#widget &gt; :not(.card, .widget, .progress) {
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.tooltip {
-  position: fixed;
-  z-index: 50;
-  top: 0;
-  left: 0;
-  width: max-content;
-  max-width: min(
-    20rem,
-    var(--tooltip-available-width, calc(100vw - 10px)),
-    calc(100vw - 10px)
-  );
-  max-height: min(
-    var(--tooltip-available-height, calc(100vh - 10px)),
-    calc(100vh - 10px)
-  );
-  padding: 4px 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  corner-shape: var(--corner-shape);
-  color: var(--popover-foreground);
-  background: var(--popover);
-  box-shadow: none;
-  font-size: var(--font-size-tooltip);
-  line-height: var(--line-height-tooltip);
-  overflow-wrap: break-word;
-  white-space: normal;
-  pointer-events: none;
-  user-select: none;
-}
-
-/* The shared runtime owns data-tooltip; suppress AppBlock&#x27;s pseudo-tooltip. */
-main [data-tooltip]::after {
-  content: none;
-}
-
-.viz-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
-  gap: 10px;
-}
-
-.viz-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.viz-stat-value {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-}
-
-.viz-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-hr {
-  width: 100%;
-  height: 1px;
-  margin-block: 6px;
-  border: 0;
-  background: var(--border);
-}
-
-.nav {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 4px;
-}
-
-.progress {
-  display: flex;
-  height: 8px;
-  margin-block: calc((var(--line-height-normal, 1.5em) - 8px) / 2);
-  overflow: hidden;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--muted);
-}
-
-.progress-bar:only-child {
-  border-radius: var(--radius-full);
-}
-
-.progress-bar {
-  height: 100%;
-  flex-shrink: 0;
-  border: 0;
-  background: var(--viz-series-1);
-}
-
-.viz-badge {
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-  color: var(--accent-foreground);
-  background: var(--accent);
-  font-weight: var(--font-weight-medium);
-}
-
-small,
-.text-small,
-.viz-badge {
-  font-size: var(--font-size-small);
-  line-height: var(--line-height-small);
-}
-
-.text-muted {
-  color: var(--muted-foreground);
-}
-
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.viz-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.viz-controls &gt; .form-label {
-  display: grid;
-  min-width: min(100%, 260px);
-  flex: 1 1 280px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 2px 12px;
-  margin-bottom: 0;
-}
-
-.viz-controls &gt; .form-label &gt; :is(.form-control, .form-range, .form-select) {
-  grid-column: 1 / -1;
-}
-
-.btn,
-.nav-link,
-.form-check-input,
-.form-control,
-.form-range,
-.form-select {
-  font: inherit;
-}
-
-.btn,
-.nav-link {
-  appearance: button;
-  display: inline-flex;
-  inline-size: fit-content;
-  max-inline-size: 100%;
-  min-height: 28px;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin: 0;
-  padding: 0 8px;
-  -webkit-app-region: no-drag;
-  border: 1px solid var(--input);
-  border-radius: var(--radius-lg);
-  corner-shape: var(--corner-shape);
-  color: var(--secondary-foreground);
-  background: var(--secondary);
-  cursor: var(--cursor-interaction, pointer);
-  text-align: center;
-  text-decoration: none;
-  white-space: nowrap;
-  user-select: none;
-  -webkit-font-smoothing: antialiased;
-}
-
-.btn:is(.btn-block, .viz-tile) {
-  inline-size: 100%;
-}
-
-.btn.viz-tile {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-
-a.btn {
-  cursor: var(--cursor-interaction, pointer);
-  text-decoration: none;
-}
-
-.btn:not(:disabled):hover,
-.nav-link:not(:disabled):not([aria-disabled=&quot;true&quot;]):hover {
-  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.btn-primary {
-  border-color: transparent;
-  color: var(--primary-foreground);
-  background: var(--foreground);
-  background-clip: padding-box;
-}
-
-.btn-primary .text-muted {
-  color: color-mix(in srgb, var(--primary-foreground) 50%, transparent);
-}
-
-.btn-primary:not(:disabled):hover {
-  background: color-mix(in srgb, var(--foreground) 80%, transparent);
-  background-clip: padding-box;
-}
-
-.btn-ghost {
-  border-color: transparent;
-  color: var(--muted-foreground);
-  background: transparent;
-}
-
-.btn-ghost:not(:disabled):hover {
-  color: var(--foreground);
-  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.nav-pills .nav-link {
-  min-width: 0;
-  border-color: transparent;
-  color: var(--muted-foreground);
-  background: transparent;
-}
-
-.nav-justified .nav-link {
-  flex: 1 1 0;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-
-.nav-pills .nav-link.active {
-  color: var(--foreground);
-  background: var(--muted);
-}
-
-/* Shared preview chrome; product styles stay inside each variant. */
-.viz-dotted-background {
-  background-image: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--foreground) 14%, transparent) 0.8px,
-    transparent 0.8px
-  );
-  background-position: center;
-  background-size: 16px 16px;
-}
-
-.viz-carousel {
-  position: relative;
-  min-width: 0;
-}
-
-.viz-carousel:has(&gt; .viz-carousel-controls) {
-  min-height: calc(60px + var(--viz-carousel-picker-height, 0px));
-  padding-bottom: 60px;
-}
-
-.viz-carousel &gt; [data-variant][hidden] {
-  display: none !important;
-}
-
-.viz-carousel &gt; [data-variant] {
-  isolation: isolate;
-}
-
-.viz-carousel-controls {
-  --viz-carousel-hover: light-dark(
-    color-mix(in srgb, var(--foreground) 5.4%, transparent),
-    color-mix(in srgb, var(--foreground) 7.8%, transparent)
-  );
-  position: absolute;
-  z-index: 2;
-  bottom: 8px;
-  left: 50%;
-  display: flex;
-  width: max-content;
-  /* Leave room for the host&#x27;s design-controls launcher at the trailing edge. */
-  max-width: calc(100% - 96px);
-  align-items: center;
-  gap: 0;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-sans);
-  /* Match the settings dropdown chrome independently of the content font size. */
-  font-size: 13px;
-  font-weight: var(--font-weight-normal);
-  line-height: 18px;
-  transform: translateX(-50%);
-  user-select: none;
-}
-
-/* Keep authored mockup button styles out of the shared carousel chrome. */
-.viz-carousel-controls button,
-.viz-carousel-picker &gt; summary {
-  display: flex !important;
-  height: auto !important;
-  min-height: 30px;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px;
-  padding: 0 6px !important;
-  -webkit-app-region: no-drag;
-  border: 0 !important;
-  border-radius: 14px !important;
-  color: inherit !important;
-  background: transparent !important;
-  font: inherit !important;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.viz-carousel-controls &gt; button,
-.viz-carousel-picker &gt; summary {
-  position: relative;
-  isolation: isolate;
-}
-
-.viz-carousel-controls &gt; button {
-  --icon-size: 16px;
-  width: 30px !important;
-  padding: 0 !important;
-}
-
-.viz-carousel-picker &gt; summary {
-  padding-inline: 12px !important;
-}
-
-.viz-carousel-controls .viz-carousel-caret {
-  width: 14px;
-  height: 14px;
-  flex: none;
-  margin: 0;
-  color: inherit;
-  transform: rotate(180deg);
-}
-
-.viz-carousel-controls &gt; button &gt; svg,
-.viz-carousel-controls .viz-carousel-caret,
-.viz-carousel-count {
-  opacity: 0.5;
-}
-
-.viz-carousel-controls &gt; button::before,
-.viz-carousel-picker &gt; summary::before {
-  position: absolute;
-  z-index: -1;
-  inset: 3px;
-  border-radius: 12px;
-  content: &quot;&quot;;
-  pointer-events: none;
-}
-
-.viz-carousel-controls &gt; button:hover::before,
-.viz-carousel-picker &gt; summary:hover::before {
-  background: var(--viz-carousel-hover);
-}
-
-.viz-carousel-controls &gt; button,
-.viz-carousel-controls [data-lucide],
-.viz-carousel-controls .lucide {
-  flex-shrink: 0;
-}
-
-.viz-carousel-picker {
-  min-width: 0;
-}
-
-.viz-carousel-picker &gt; summary {
-  min-width: 0;
-  list-style: none;
-}
-
-.viz-carousel-picker &gt; summary::-webkit-details-marker {
-  display: none;
-}
-
-.viz-carousel-count {
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.viz-carousel-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.viz-carousel-options {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 4px);
-  left: 0;
-  display: flex;
-  max-height: 240px;
-  flex-direction: column;
-  gap: 2px;
-  overflow: auto;
-  padding: 4px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--background);
-  box-shadow: 0 4px 12px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 25%));
-}
-
-.viz-carousel-options &gt; button {
-  border-radius: max(0px, calc(var(--radius-lg) - 5px)) !important;
-  width: 100% !important;
-  min-height: 28px;
-  justify-content: flex-start !important;
-  padding: 4px 8px !important;
-  font-size: var(--font-size-small) !important;
-  text-align: start;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.viz-carousel-options &gt; [aria-current=&quot;true&quot;],
-.viz-carousel-options &gt; button:hover {
-  background: var(--viz-carousel-hover) !important;
-}
-
-.btn:disabled,
-.nav-link:disabled,
-.nav-link[aria-disabled=&quot;true&quot;] {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-[data-lucide] {
-  stroke-width: 1.6;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--foreground);
-}
-
-.form-control {
-  display: block;
-  width: 100%;
-  min-height: 28px;
-  padding: 0 8px;
-  outline: none;
-  border: 1px solid var(--input);
-  border-radius: var(--radius-lg);
-  corner-shape: var(--corner-shape);
-  color: var(--foreground);
-  background: var(--secondary);
-}
-
-.form-control::placeholder {
-  color: var(--muted-foreground);
-}
-
-.form-control[type=&quot;file&quot;] {
-  padding: 0;
-  overflow: hidden;
-  cursor: var(--cursor-interaction, pointer);
-}
-
-.form-control[type=&quot;file&quot;]::file-selector-button {
-  min-height: 26px;
-  margin-right: 8px;
-  padding: 0 8px;
-  border: 0;
-  border-right: 1px solid var(--input);
-  color: var(--secondary-foreground);
-  background: var(--secondary);
-  cursor: inherit;
-  font: inherit;
-}
-
-.form-control[type=&quot;file&quot;]:not(:disabled):hover::file-selector-button {
-  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.form-control-color[type=&quot;color&quot;] {
-  width: 40px;
-  height: 28px;
-  padding: 3px;
-  cursor: var(--cursor-interaction, pointer);
-}
-
-.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch {
-  border: 0;
-  border-radius: calc(var(--radius-lg) - 4px);
-  corner-shape: var(--corner-shape);
-}
-
-textarea.form-control {
-  height: auto;
-  min-height: 72px;
-  padding: 8px 10px;
-  resize: vertical;
-}
-
-.form-control:focus-visible {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-control:disabled,
-.form-select:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.form-select {
-  appearance: none;
-  display: block;
-  width: 100%;
-  min-height: 28px;
-  margin: 0;
-  padding: 0 32px 0 8px;
-  outline: none;
-  border: 1px solid var(--input);
-  border-radius: var(--radius-lg);
-  corner-shape: var(--corner-shape);
-  color: var(--foreground);
-  background-color: var(--secondary);
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
-    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
-  background-position:
-    calc(100% - 14px) 50%,
-    calc(100% - 10px) 50%;
-  background-repeat: no-repeat;
-  background-size: 4px 4px;
-  cursor: var(--cursor-interaction, default);
-}
-
-.form-select:not(:disabled):hover {
-  background-color: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.form-select:focus-visible {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-check {
-  display: flex;
-  min-height: 20px;
-  align-items: center;
-  gap: 6px;
-}
-
-.form-check-input {
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  flex: 0 0 auto;
-  margin: 0;
-  border: 1px solid var(--input);
-  color: var(--primary-foreground);
-  background-color: transparent;
-  cursor: var(--cursor-interaction, default);
-  transition:
-    background-color 150ms,
-    border-color 150ms,
-    box-shadow 150ms;
-}
-
-.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;] {
-  border-color: var(--input);
-  border-radius: var(--radius-sm);
-  corner-shape: var(--corner-shape);
-  background-color: var(--secondary);
-  box-shadow: var(--shadow-sm);
-}
-
-.form-check:not(.form-switch)
-  .form-check-input:not(:disabled):not(:checked):hover {
-  background-color: var(--card);
-}
-
-.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;]:checked {
-  border-color: var(--primary);
-  background-color: var(--primary);
-}
-
-.form-check:not(.form-switch)
-  .form-check-input[type=&quot;checkbox&quot;]:checked::before {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: var(--primary-foreground);
-  content: &quot;&quot;;
-  mask: var(--checkmark-image) center / 12px 12px no-repeat;
-}
-
-.form-check-input[type=&quot;radio&quot;] {
-  width: 14px;
-  height: 14px;
-  border-radius: var(--radius-full);
-}
-
-.form-check-input[type=&quot;radio&quot;]:checked {
-  border: 2px solid var(--primary);
-  background:
-    radial-gradient(circle, var(--primary-foreground) 0 2.5px, transparent 3px),
-    var(--primary);
-}
-
-.form-check:not(.form-switch) .form-check-input:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-.form-check:not(.form-switch) .form-check-input:disabled {
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
-  cursor: not-allowed;
-}
-
-.form-switch .form-check-input:disabled,
-.form-switch .form-check-input:disabled + .form-check-label {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.form-check-label {
-  color: var(--foreground);
-  cursor: var(--cursor-interaction, default);
-}
-
-.form-switch .form-check-input {
-  position: relative;
-  width: 32px;
-  height: 20px;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--muted);
-  box-shadow: none;
-  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.form-switch .form-check-input::before {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 16px;
-  height: 16px;
-  box-sizing: border-box;
-  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
-  border-radius: var(--radius-full);
-  background: light-dark(var(--primary-foreground), var(--foreground));
-  box-shadow: var(--shadow-sm);
-  content: &quot;&quot;;
-  transform: translate(2px, -50%);
-  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.form-switch .form-check-input:checked {
-  background: var(--primary);
-}
-
-.form-switch .form-check-input:checked::before {
-  transform: translate(14px, -50%);
-}
-
-.form-switch .form-check-input:focus-visible {
-  box-shadow: 0 0 0 2px var(--ring);
-}
-
-.form-range {
-  appearance: none;
-  display: block;
-  width: 100%;
-  height: 28px;
-  flex: 1;
-  margin: 0;
-  padding: 0;
-  outline: none;
-  border: 0;
-  accent-color: var(--primary);
-  background: linear-gradient(
-      color-mix(in srgb, var(--foreground) 7%, transparent),
-      color-mix(in srgb, var(--foreground) 7%, transparent)
-    )
-    center / 100% 2px no-repeat;
-}
-
-.form-range::-webkit-slider-runnable-track {
-  height: 28px;
-  background: transparent;
-}
-
-.form-range::-webkit-slider-thumb {
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  margin-top: 4px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: light-dark(var(--primary-foreground), var(--foreground));
-}
-
-.form-range:focus-visible::-webkit-slider-thumb {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-range::-moz-range-track {
-  height: 28px;
-  background: transparent;
-}
-
-.form-range::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: light-dark(var(--primary-foreground), var(--foreground));
-}
-
-.form-range:focus-visible::-moz-range-thumb {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-range:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.btn:not(.btn-primary, .viz-tile):is(
-  [aria-pressed=&quot;true&quot;],
-  [aria-selected=&quot;true&quot;],
-  .is-selected
-) {
-  border-color: var(--primary);
-  color: var(--primary-foreground);
-  background: var(--primary);
-}
-
-.btn.viz-tile:is([aria-pressed=&quot;true&quot;], [aria-selected=&quot;true&quot;], .is-selected) {
-  border-color: var(--primary);
-  box-shadow: inset 0 0 0 1px var(--primary);
-}
-
-.btn:focus-visible,
-.nav-link:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-.viz-carousel-controls :is(button, summary):focus-visible {
-  outline: 2px solid var(--ring) !important;
-  outline-offset: 2px !important;
-}
-
-@media (pointer: coarse) {
-  .viz-carousel:has(&gt; .viz-carousel-controls) {
-    min-height: calc(76px + var(--viz-carousel-picker-height, 0px));
-    padding-bottom: 76px;
-  }
-
-  .btn,
-  .nav-link,
-  .viz-carousel-controls button,
-  .viz-carousel-picker &gt; summary,
-  .form-control,
-  .form-select {
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  /* Keep small-screen WebKit from zooming when a text field receives focus. */
-  .form-control,
-  .form-select {
-    font-size: max(16px, var(--font-size-normal));
-  }
-
-  .form-control[type=&quot;file&quot;]::file-selector-button {
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  .form-control-color[type=&quot;color&quot;] {
-    width: 44px;
-    height: 44px;
-  }
-
-  .form-control:is(
-    [type=&quot;date&quot;],
-    [type=&quot;datetime-local&quot;],
-    [type=&quot;month&quot;],
-    [type=&quot;time&quot;],
-    [type=&quot;week&quot;]
-  ) {
-    min-width: 0;
-    max-width: 100%;
-    padding-block: 8px;
-  }
-
-  .form-check {
-    min-height: 44px;
-    padding-inline: 15px;
-  }
-
-  .form-check-input {
-    position: relative;
-  }
-
-  .form-check-input::after {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 44px;
-    height: 44px;
-    content: &quot;&quot;;
-    transform: translate(-50%, -50%);
-  }
-
-  .form-check-label {
-    display: inline-flex;
-    min-width: 44px;
-    min-height: 44px;
-    align-items: center;
-  }
-
-  .form-range {
-    height: 44px;
-    touch-action: pan-y;
-  }
-
-  .form-range::-webkit-slider-runnable-track {
-    height: 44px;
-  }
-
-  .form-range::-moz-range-track {
-    height: 44px;
-  }
-
-  .form-range::-webkit-slider-thumb {
-    margin-top: 12px;
-  }
-}
-
-svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-#widget &gt; svg {
-  width: 100%;
-}
-
-/* Model-authored chart rules can otherwise stretch icons after these styles load. */
-svg.lucide {
-  display: block;
-  width: var(--icon-size) !important;
-  height: var(--icon-size) !important;
-  flex: none;
-  margin: 0 !important;
-  stroke-width: 1.6;
-}
-
-.text-warning,
-.text-destructive {
-  color: var(--destructive);
-}
-
-html&gt;body{padding:0}&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;script type=&quot;application/json&quot; id=&quot;codex-visualization-widget-state&quot;&gt;__CODEX_VISUALIZATION_WIDGET_STATE__&lt;/script&gt;
-&lt;script&gt;(() =&gt; {
-  const root = document.documentElement;
-  const mediaQuery = globalThis.matchMedia(&quot;(prefers-color-scheme: dark)&quot;);
-  const apply = Reflect.apply;
-  const isArray = Array.isArray;
-  const hasOwn = Object.hasOwn;
-  const parentWindow = globalThis.parent;
-  const stringify = JSON.stringify;
-  const parse = JSON.parse;
-  const encode = TextEncoder.prototype.encode.bind(new TextEncoder());
-  const initialStateElement = document.getElementById(
-    &quot;codex-visualization-widget-state&quot;,
-  );
-  const initialGlobals = parse(initialStateElement?.textContent ?? &quot;{}&quot;);
-  initialStateElement?.remove();
-  /** @type {Record&lt;string, unknown&gt; | null} */
-  let state = initialGlobals.widgetState ?? null;
-  const statePersistence = initialGlobals.statePersistence ?? &quot;none&quot;;
-  let nextStateRequestId = 0;
-  /** @type {Map&lt;number, { resolve: () =&gt; void; reject: (error: Error) =&gt; void; timeout: ReturnType&lt;typeof globalThis.setTimeout&gt;; serializedState: string }&gt;} */
-  const pendingStateWrites = new Map();
-  const persistenceError = () =&gt;
-    Object.assign(
-      new Error(&quot;The host could not persist the widget state update&quot;),
-      {
-        code: -32000,
-        data: { code: &quot;widget_state_persistence_failed&quot;, retryable: false },
-      },
-    );
-  /**
-   * @param {object} prototype
-   * @param {string} property
-   */
-  const getPrototypeGetter = (prototype, property) =&gt; {
-    // oxlint-disable-next-line typescript/unbound-method -- invoked through captured Reflect.apply
-    const getter = Object.getOwnPropertyDescriptor(prototype, property)?.get;
-    if (getter == null) {
-      throw new Error(`Missing ${property} getter`);
-    }
-    return getter;
-  };
-  const getMessageData = getPrototypeGetter(MessageEvent.prototype, &quot;data&quot;);
-  const getMessagePorts = getPrototypeGetter(MessageEvent.prototype, &quot;ports&quot;);
-  const getMessageSource = getPrototypeGetter(MessageEvent.prototype, &quot;source&quot;);
-  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
-  const addHostMessageListener = MessagePort.prototype.addEventListener;
-  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
-  const postHostMessage = MessagePort.prototype.postMessage;
-  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
-  const startHostPort = MessagePort.prototype.start;
-  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
-  const stopMessagePropagation = Event.prototype.stopImmediatePropagation;
-  /** @type {MessagePort | null} */
-  let hostPort = null;
-  const postToHost = (type, payload) =&gt; {
-    if (hostPort != null) {
-      apply(postHostMessage, hostPort, [{ type, ...payload }]);
-    }
-  };
-  const openExternal = ({ href }) =&gt; {
-    if (globalThis.navigator.userActivation?.isActive === true) {
-      postToHost(&quot;open-external&quot;, { href });
-    }
-  };
-  const sendFollowUpMessage = ({ context, prompt, title }) =&gt; {
-    if (globalThis.navigator.userActivation?.isActive === true) {
-      postToHost(&quot;follow-up&quot;, { context, prompt, title });
-    }
-    return Promise.resolve();
-  };
-  /**
-   * @param {Record&lt;string, unknown&gt; | ((previous: Record&lt;string, unknown&gt; | null) =&gt; Record&lt;string, unknown&gt;)} next
-   * @returns {Promise&lt;void&gt;}
-   */
-  const setWidgetState = async (next) =&gt; {
-    const nextState = typeof next === &quot;function&quot; ? next(state) : next;
-    if (
-      nextState == null ||
-      typeof nextState !== &quot;object&quot; ||
-      isArray(nextState)
-    ) {
-      throw new TypeError(&quot;Widget state must be a JSON object&quot;);
-    }
-    const inputState = stringify(
-      nextState,
-      (_key, /** @type {unknown} */ value) =&gt; {
-        if (
-          typeof value === &quot;undefined&quot; ||
-          typeof value === &quot;function&quot; ||
-          typeof value === &quot;symbol&quot; ||
-          (typeof value === &quot;number&quot; &amp;&amp; !Number.isFinite(value))
-        ) {
-          throw new TypeError(&quot;Widget state must be a JSON object&quot;);
-        }
-        return value;
-      },
-    );
-    const parsedState = parse(inputState);
-    if (
-      parsedState == null ||
-      typeof parsedState !== &quot;object&quot; ||
-      isArray(parsedState)
-    ) {
-      throw new TypeError(&quot;Widget state must be a JSON object&quot;);
-    }
-    const storedState = {
-      modelContent: null,
-      privateContent: null,
-      ...parsedState,
-    };
-    const serializedState = stringify(storedState);
-    if (encode(serializedState).length &gt; 16 * 1024) {
-      throw new TypeError(
-        &quot;Widget state must be a JSON object of at most 16 KiB&quot;,
-      );
-    }
-    if (
-      hasOwn(storedState, &quot;imageIds&quot;) &amp;&amp;
-      (!isArray(storedState.imageIds) ||
-        storedState.imageIds.some(
-          (/** @type {unknown} */ id) =&gt; typeof id !== &quot;string&quot;,
-        ))
-    ) {
-      throw new TypeError(&quot;Widget state imageIds must be an array of strings&quot;);
-    }
-    if (storedState.imageIds?.length &gt; 0) {
-      throw Object.assign(
-        new TypeError(&quot;Visualization state does not support image attachments&quot;),
-        { code: -32602, data: { code: &quot;images_unsupported&quot; } },
-      );
-    }
-    state = storedState;
-    globalThis.openai.widgetState = state;
-    globalThis.dispatchEvent(
-      new CustomEvent(&quot;openai:set_globals&quot;, {
-        detail: { globals: { widgetState: state } },
-      }),
-    );
-    if (statePersistence === &quot;none&quot;) {
-      throw persistenceError();
-    }
-    const id = ++nextStateRequestId;
-    return new Promise((resolve, reject) =&gt; {
-      const timeout = globalThis.setTimeout(() =&gt; {
-        pendingStateWrites.delete(id);
-        reject(persistenceError());
-      }, 30_000);
-      pendingStateWrites.set(id, { resolve, reject, timeout, serializedState });
-      postToHost(&quot;widget-state-write&quot;, { id, state: serializedState });
-    });
-  };
-  const syncTheme = () =&gt; {
-    const theme = mediaQuery.matches ? &quot;dark&quot; : &quot;light&quot;;
-    root.dataset.theme = theme;
-    globalThis.openai = {
-      ...globalThis.openai,
-      openExternal,
-      sendFollowUpMessage,
-      setWidgetState,
-      theme,
-      visualizationStyleVariables: {},
-      visualizationTheme: theme,
-      widgetState: state,
-      statePersistence,
-      stateModelContext: &quot;none&quot;,
-    };
-    globalThis.dispatchEvent(
-      new CustomEvent(&quot;openai:set_globals&quot;, {
-        detail: { globals: globalThis.openai },
-      }),
-    );
-  };
-  const sendHeight = () =&gt; {
-    postToHost(&quot;height&quot;, {
-      height: Math.ceil(
-        Math.max(
-          document.body.scrollHeight,
-          document.body.getBoundingClientRect().height,
-        ),
-      ),
-    });
-  };
-
-  globalThis.addEventListener(
-    &quot;message&quot;,
-    (event) =&gt; {
-      const data = apply(getMessageData, event, []);
-      const ports = apply(getMessagePorts, event, []);
-      const source = apply(getMessageSource, event, []);
-      if (
-        hostPort != null ||
-        source !== parentWindow ||
-        typeof data !== &quot;object&quot; ||
-        data?.type !== &quot;codex-visualization-initialize&quot; ||
-        !isArray(ports) ||
-        ports.length !== 1
-      ) {
-        return;
-      }
-      apply(stopMessagePropagation, event, []);
-      const nextHostPort = ports[0];
-      try {
-        apply(addHostMessageListener, nextHostPort, [
-          &quot;message&quot;,
-          (event) =&gt; {
-            const data = apply(getMessageData, event, []);
-            if (typeof data === &quot;object&quot; &amp;&amp; data?.type === &quot;measure&quot;) {
-              sendHeight();
-            } else if (
-              typeof data === &quot;object&quot; &amp;&amp;
-              data?.type === &quot;widget-state-result&quot;
-            ) {
-              /** @type {unknown} */
-              const id = data.id;
-              if (typeof id !== &quot;number&quot;) {
-                return;
-              }
-              const pending = pendingStateWrites.get(id);
-              if (pending != null) {
-                pendingStateWrites.delete(id);
-                globalThis.clearTimeout(pending.timeout);
-                if (data.ok === true) {
-                  pending.resolve();
-                } else {
-                  pending.reject(persistenceError());
-                }
-              }
-            }
-          },
-        ]);
-        apply(startHostPort, nextHostPort, []);
-      } catch {
-        return;
-      }
-      hostPort = nextHostPort;
-      for (const [id, { serializedState }] of pendingStateWrites) {
-        postToHost(&quot;widget-state-write&quot;, { id, state: serializedState });
-      }
-      sendHeight();
-    },
-    { capture: true },
-  );
-  document.currentScript?.remove();
-  mediaQuery.addEventListener(&quot;change&quot;, syncTheme);
-  globalThis.addEventListener(&quot;click&quot;, (event) =&gt; {
-    if (event.defaultPrevented) {
-      return;
-    }
-    let element = null;
-    if (event.target instanceof globalThis.Element) {
-      element = event.target;
-    } else if (event.target instanceof globalThis.Node) {
-      element = event.target.parentElement;
-    }
-    const link = element?.closest(&quot;a[href]&quot;);
-    const href = link?.getAttribute(&quot;href&quot;);
-    if (href == null) {
-      return;
-    }
-    if (href.startsWith(&quot;#&quot;)) {
-      let id;
-      try {
-        id = decodeURIComponent(href.slice(1));
-      } catch {
-        return;
-      }
-      const target = id.length === 0 ? root : document.getElementById(id);
-      if (
-        target == null ||
-        globalThis.navigator.userActivation?.isActive !== true
-      ) {
-        return;
-      }
-      event.preventDefault();
-      postToHost(&quot;scroll-to&quot;, {
-        top: target.getBoundingClientRect().top + globalThis.scrollY,
-      });
-      return;
-    }
-    event.preventDefault();
-    openExternal({ href });
-  });
-  new ResizeObserver(sendHeight).observe(document.body);
-  syncTheme();
+<div class="audio-settings">
+<label for="speech-voice">English voice</label>
+<select id="speech-voice" aria-label="English voice"><option value="">Automatic</option></select>
+<span id="speech-status" role="status" aria-live="polite"></span>
+</div>
+<script>
+(()=>{
+const select=document.getElementById('speech-voice');
+function refresh(){
+ const chosen=select.value;
+ const voices=window.speechSynthesis?.getVoices().filter(v=>/^en(?:-|$)/i.test(v.lang))||[];
+ select.replaceChildren(new Option('Automatic',''));
+ voices.forEach(v=>select.add(new Option(v.name+' ('+v.lang+')',v.voiceURI)));
+ if(voices.some(v=>v.voiceURI===chosen))select.value=chosen;
+}
+refresh();
+window.speechSynthesis?.addEventListener('voiceschanged',refresh);
+select.addEventListener('change',()=>window.speechSynthesis?.cancel());
 })();
-&lt;/script&gt;
-&lt;div id=&quot;character-root&quot;&gt;&lt;/div&gt;
-&lt;style&gt;#character-root{font-family:Arial,sans-serif;color-scheme:light}#character-root .min-h-screen{min-height:0}#character-root button{cursor:pointer}&lt;/style&gt;
-&lt;script&gt;
-(async()=&gt;{
-const load=(src)=&gt;new Promise((resolve,reject)=&gt;{const s=document.createElement(&#x27;script&#x27;);s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});
+</script>
+<div id="character-root"></div>
+<style>#character-root{font-family:Arial,sans-serif;color-scheme:light}#character-root .min-h-screen{min-height:0}#character-root button{cursor:pointer}</style>
+<script>
+(async()=>{
+const load=(src)=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});
 try{
-await load(&#x27;https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js&#x27;);
-await load(&#x27;https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js&#x27;);
-await load(&#x27;https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.13/dist/index.global.js&#x27;);
+await load('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js');
+await load('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js');
+await load('https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.13/dist/index.global.js');
 const {
   useState,
   useEffect,
@@ -1562,209 +43,213 @@ const {
   useCallback
 } = React;
 
-// --- OPTIONS &amp; CONFIGURATION ---
+// --- OPTIONS & CONFIGURATION ---
 
 const OPTIONS = {
-  gender: [&#x27;Female&#x27;, &#x27;Male&#x27;],
-  facialHair: [&#x27;Clean&#x27;, &#x27;Mustache&#x27;, &#x27;Beard&#x27;],
-  upperWear: [&#x27;T-shirt&#x27;, &#x27;Shirt&#x27;, &#x27;Sweatshirt&#x27;, &#x27;Raincoat&#x27;, &#x27;Jumper&#x27;, &#x27;Suit&#x27;, &#x27;Jacket&#x27;, &#x27;Lab coat&#x27;, &#x27;Police Uniform&#x27;, &#x27;Firefighter Uniform&#x27;, &#x27;Workers Vest&#x27;, &quot;Worker&#x27;s Overalls&quot;, &#x27;Dress&#x27;],
-  lowerWear: [&#x27;Trousers&#x27;, &#x27;Jeans&#x27;, &#x27;Skirt&#x27;, &#x27;Suit-Pants&#x27;, &#x27;Sweatpants&#x27;],
-  shoes: [&#x27;Sneakers&#x27;, &#x27;Boots&#x27;, &#x27;High heels&#x27;, &#x27;Classic&#x27;, &#x27;Long boots&#x27;],
-  accessories: [&#x27;Hat&#x27;, &#x27;Police Hat&#x27;, &#x27;Firefighter Hat&#x27;, &#x27;Chef Hat&#x27;, &#x27;Hard hat&#x27;, &#x27;Stethoscope&#x27;, &#x27;Gloves&#x27;, &#x27;Watch&#x27;, &#x27;Glasses&#x27;, &#x27;Sunglasses&#x27;, &#x27;Bag&#x27;, &#x27;Necklace&#x27;, &#x27;Scarf&#x27;, &#x27;Tie&#x27;, &#x27;Earrings&#x27;, &#x27;Umbrella&#x27;, &#x27;Belt&#x27;],
-  hairStyle: [&#x27;None&#x27;, &#x27;Straight&#x27;, &#x27;Wavy&#x27;, &#x27;Curly&#x27;],
-  hairLength: [&#x27;Short&#x27;, &#x27;Medium&#x27;, &#x27;Long&#x27;],
-  hairColor: [&#x27;Blonde&#x27;, &#x27;Blond&#x27;, &#x27;Grey&#x27;, &#x27;Dark&#x27;, &#x27;Brown&#x27;, &#x27;Red&#x27;],
-  eyeColor: [&#x27;Green&#x27;, &#x27;Blue&#x27;, &#x27;Hazel&#x27;, &#x27;Brown&#x27;],
-  height: [&#x27;Tall&#x27;, &#x27;Medium&#x27;, &#x27;Short&#x27;],
-  bodyType: [&#x27;Fat&#x27;, &#x27;Plump&#x27;, &#x27;Average&#x27;, &#x27;Slim&#x27;]
+  gender: ['Female', 'Male'],
+  facialHair: ['Clean', 'Mustache', 'Beard'],
+  upperWear: ['T-shirt', 'Shirt', 'Sweatshirt', 'Raincoat', 'Jumper', 'Suit', 'Jacket', 'Lab coat', 'Police Uniform', 'Firefighter Uniform', 'Workers Vest', "Worker's Overalls", 'Dress'],
+  lowerWear: ['Trousers', 'Jeans', 'Skirt', 'Suit-Pants', 'Sweatpants'],
+  shoes: ['Sneakers', 'Boots', 'High heels', 'Classic', 'Long boots'],
+  accessories: ['Hat', 'Police Hat', 'Firefighter Hat', 'Chef Hat', 'Hard hat', 'Stethoscope', 'Gloves', 'Watch', 'Glasses', 'Sunglasses', 'Bag', 'Necklace', 'Scarf', 'Tie', 'Earrings', 'Umbrella', 'Belt'],
+  hairStyle: ['None', 'Straight', 'Wavy', 'Curly'],
+  hairLength: ['Short', 'Medium', 'Long'],
+  hairColor: ['Blonde', 'Blond', 'Grey', 'Dark', 'Brown', 'Red'],
+  eyeColor: ['Green', 'Blue', 'Hazel', 'Brown'],
+  height: ['Tall', 'Medium', 'Short'],
+  bodyType: ['Fat', 'Plump', 'Average', 'Slim']
 };
 const METRICS = {
   height: {
-    &#x27;Tall&#x27;: &#x27;1.90 m&#x27;,
-    &#x27;Medium&#x27;: &#x27;1.75 m&#x27;,
-    &#x27;Short&#x27;: &#x27;1.60 m&#x27;
+    'Tall': '1.90 m',
+    'Medium': '1.75 m',
+    'Short': '1.60 m'
   },
   weight: {
-    &#x27;Fat&#x27;: &#x27;110 kg&#x27;,
-    &#x27;Plump&#x27;: &#x27;90 kg&#x27;,
-    &#x27;Average&#x27;: &#x27;75 kg&#x27;,
-    &#x27;Slim&#x27;: &#x27;60 kg&#x27;
+    'Fat': '110 kg',
+    'Plump': '90 kg',
+    'Average': '75 kg',
+    'Slim': '60 kg'
   }
 };
 const COLORS = {
-  skin: &#x27;#ffe0bd&#x27;,
-  skinDark: &#x27;#f0cba3&#x27;,
-  lipFemale: &#x27;#e88a8a&#x27;,
-  lipFemaleDark: &#x27;#c56b6b&#x27;,
-  lipMale: &#x27;#a55a4e&#x27;,
+  skin: '#ffe0bd',
+  skinDark: '#f0cba3',
+  lipFemale: '#e88a8a',
+  lipFemaleDark: '#c56b6b',
+  lipMale: '#a55a4e',
   hair: {
-    Blonde: &#x27;#fde047&#x27;,
-    Blond: &#x27;#fef08a&#x27;,
-    Grey: &#x27;#d1d5db&#x27;,
-    Dark: &#x27;#1f2937&#x27;,
-    Brown: &#x27;#713f12&#x27;,
-    Red: &#x27;#b91c1c&#x27;
+    Blonde: '#fde047',
+    Blond: '#fef08a',
+    Grey: '#d1d5db',
+    Dark: '#1f2937',
+    Brown: '#713f12',
+    Red: '#b91c1c'
   },
   eye: {
-    Green: &#x27;#16a34a&#x27;,
-    Blue: &#x27;#2563eb&#x27;,
-    Hazel: &#x27;#ca8a04&#x27;,
-    Brown: &#x27;#451a03&#x27;
+    Green: '#16a34a',
+    Blue: '#2563eb',
+    Hazel: '#ca8a04',
+    Brown: '#451a03'
   },
   clothing: {
-    &#x27;T-shirt&#x27;: &#x27;#dc2626&#x27;,
-    &#x27;Shirt&#x27;: &#x27;#3b82f6&#x27;,
-    &#x27;Sweatshirt&#x27;: &#x27;#64748b&#x27;,
-    &#x27;Raincoat&#x27;: &#x27;#facc15&#x27;,
-    &#x27;Jumper&#x27;: &#x27;#059669&#x27;,
-    &#x27;Suit&#x27;: &#x27;#1e293b&#x27;,
-    &#x27;Jacket&#x27;: &#x27;#475569&#x27;,
-    &#x27;Lab coat&#x27;: &#x27;#ffffff&#x27;,
-    &#x27;Police Uniform&#x27;: &#x27;#1e3a8a&#x27;,
-    &#x27;Firefighter Uniform&#x27;: &#x27;#45474a&#x27;,
-    &#x27;Workers Vest&#x27;: &#x27;#fb923c&#x27;,
-    &quot;Worker&#x27;s Overalls&quot;: &#x27;#1e3a8a&#x27;,
-    &#x27;Trousers&#x27;: &#x27;#334155&#x27;,
-    &#x27;Jeans&#x27;: &#x27;#2563eb&#x27;,
-    &#x27;Skirt&#x27;: &#x27;#db2777&#x27;,
-    &#x27;Dress&#x27;: &#x27;#8b5cf6&#x27;,
-    &#x27;Suit-Pants&#x27;: &#x27;#1e293b&#x27;,
-    &#x27;Sweatpants&#x27;: &#x27;#4b5563&#x27;,
-    &#x27;Hat&#x27;: &#x27;#451a03&#x27;,
-    &#x27;Police Hat&#x27;: &#x27;#1e3a8a&#x27;,
-    &#x27;Firefighter Hat&#x27;: &#x27;#b91c1c&#x27;,
-    &#x27;Chef Hat&#x27;: &#x27;#ffffff&#x27;,
-    &#x27;Hard hat&#x27;: &#x27;#facc15&#x27;,
-    &#x27;Stethoscope&#x27;: &#x27;#475569&#x27;,
-    &#x27;Gloves&#x27;: &#x27;#1e293b&#x27;,
-    &#x27;Watch&#x27;: &#x27;#334155&#x27;,
-    &#x27;Glasses&#x27;: &#x27;#1f2937&#x27;,
-    &#x27;Sunglasses&#x27;: &#x27;#000000&#x27;,
-    &#x27;Bag&#x27;: &#x27;#78350f&#x27;,
-    &#x27;Necklace&#x27;: &#x27;#fbbf24&#x27;,
-    &#x27;Scarf&#x27;: &#x27;#ea580c&#x27;,
-    &#x27;Tie&#x27;: &#x27;#be123c&#x27;,
-    &#x27;Earrings&#x27;: &#x27;#fcd34d&#x27;,
-    &#x27;Umbrella&#x27;: &#x27;#374151&#x27;,
-    &#x27;Belt&#x27;: &#x27;#27272a&#x27;
+    'T-shirt': '#dc2626',
+    'Shirt': '#3b82f6',
+    'Sweatshirt': '#64748b',
+    'Raincoat': '#facc15',
+    'Jumper': '#059669',
+    'Suit': '#1e293b',
+    'Jacket': '#475569',
+    'Lab coat': '#ffffff',
+    'Police Uniform': '#1e3a8a',
+    'Firefighter Uniform': '#45474a',
+    'Workers Vest': '#fb923c',
+    "Worker's Overalls": '#1e3a8a',
+    'Trousers': '#334155',
+    'Jeans': '#2563eb',
+    'Skirt': '#db2777',
+    'Dress': '#8b5cf6',
+    'Suit-Pants': '#1e293b',
+    'Sweatpants': '#4b5563',
+    'Hat': '#451a03',
+    'Police Hat': '#1e3a8a',
+    'Firefighter Hat': '#b91c1c',
+    'Chef Hat': '#ffffff',
+    'Hard hat': '#facc15',
+    'Stethoscope': '#475569',
+    'Gloves': '#1e293b',
+    'Watch': '#334155',
+    'Glasses': '#1f2937',
+    'Sunglasses': '#000000',
+    'Bag': '#78350f',
+    'Necklace': '#fbbf24',
+    'Scarf': '#ea580c',
+    'Tie': '#be123c',
+    'Earrings': '#fcd34d',
+    'Umbrella': '#374151',
+    'Belt': '#27272a'
   },
   shoes: {
-    &#x27;Sneakers&#x27;: &#x27;#e2e8f0&#x27;,
-    &#x27;Boots&#x27;: &#x27;#5d4037&#x27;,
-    &#x27;High heels&#x27;: &#x27;#be123c&#x27;,
-    &#x27;Classic&#x27;: &#x27;#171717&#x27;,
-    &#x27;Long boots&#x27;: &#x27;#262626&#x27;
+    'Sneakers': '#e2e8f0',
+    'Boots': '#5d4037',
+    'High heels': '#be123c',
+    'Classic': '#171717',
+    'Long boots': '#262626'
   }
 };
 const TRANSLATIONS = {
-  gender: &#x27;Gender&#x27;,
-  facialHair: &#x27;Facial Hair&#x27;,
-  upperWear: &#x27;TOPS&#x27;,
-  lowerWear: &#x27;BOTTOMS&#x27;,
-  shoes: &#x27;Shoes&#x27;,
-  Female: &#x27;Female&#x27;,
-  Male: &#x27;Male&#x27;,
-  Clean: &#x27;Clean Shaven&#x27;,
-  Mustache: &#x27;Mustache&#x27;,
-  Beard: &#x27;Beard&#x27;,
-  hairStyle: &#x27;HAIRSTYLE&#x27;,
-  hairLength: &#x27;Hair Length&#x27;,
-  hairColor: &#x27;Hair Color&#x27;,
-  eyeColor: &#x27;Eye Color&#x27;,
-  height: &#x27;Height&#x27;,
-  bodyType: &#x27;Body Type&#x27;,
-  &#x27;T-shirt&#x27;: &#x27;T-shirt&#x27;,
-  &#x27;Shirt&#x27;: &#x27;Shirt&#x27;,
-  &#x27;Sweatshirt&#x27;: &#x27;Sweatshirt&#x27;,
-  &#x27;Raincoat&#x27;: &#x27;Raincoat&#x27;,
-  &#x27;Jumper&#x27;: &#x27;Jumper&#x27;,
-  &#x27;Suit&#x27;: &#x27;Suit&#x27;,
-  &#x27;Jacket&#x27;: &#x27;Jacket&#x27;,
-  &#x27;Lab coat&#x27;: &#x27;Lab coat&#x27;,
-  &#x27;Police Uniform&#x27;: &#x27;Police Uniform&#x27;,
-  &#x27;Firefighter Uniform&#x27;: &#x27;Firefighter Uniform&#x27;,
-  &#x27;Workers Vest&#x27;: &#x27;Workers Vest&#x27;,
-  &quot;Worker&#x27;s Overalls&quot;: &quot;Worker&#x27;s Overalls&quot;,
-  &#x27;Trousers&#x27;: &#x27;Trousers&#x27;,
-  &#x27;Jeans&#x27;: &#x27;Jeans&#x27;,
-  &#x27;Skirt&#x27;: &#x27;Skirt&#x27;,
-  &#x27;Dress&#x27;: &#x27;Dress&#x27;,
-  &#x27;Suit-Pants&#x27;: &#x27;Suit-Pants&#x27;,
-  &#x27;Sweatpants&#x27;: &#x27;Sweatpants&#x27;,
-  &#x27;Sneakers&#x27;: &#x27;Sneakers&#x27;,
-  &#x27;Boots&#x27;: &#x27;Boots&#x27;,
-  &#x27;High heels&#x27;: &#x27;High heels&#x27;,
-  &#x27;Classic&#x27;: &#x27;Classic&#x27;,
-  &#x27;Long boots&#x27;: &#x27;Long boots&#x27;,
-  None: &#x27;Bald&#x27;,
-  Hat: &#x27;Hat&#x27;,
-  &#x27;Police Hat&#x27;: &#x27;Police Hat&#x27;,
-  &#x27;Firefighter Hat&#x27;: &#x27;Firefighter Hat&#x27;,
-  &#x27;Chef Hat&#x27;: &#x27;Chef Hat&#x27;,
-  &#x27;Hard hat&#x27;: &#x27;Hard hat&#x27;,
-  &#x27;Stethoscope&#x27;: &#x27;Stethoscope&#x27;,
-  Gloves: &#x27;Gloves&#x27;,
-  Watch: &#x27;Watch&#x27;,
-  Glasses: &#x27;Glasses&#x27;,
-  Sunglasses: &#x27;Sunglasses&#x27;,
-  Bag: &#x27;Bag&#x27;,
-  Necklace: &#x27;Necklace&#x27;,
-  Scarf: &#x27;Scarf&#x27;,
-  Tie: &#x27;Tie&#x27;,
-  Earrings: &#x27;Earrings&#x27;,
-  Umbrella: &#x27;Umbrella&#x27;,
-  Belt: &#x27;Belt&#x27;,
-  Straight: &#x27;Straight&#x27;,
-  Wavy: &#x27;Wavy&#x27;,
-  Curly: &#x27;Curly&#x27;,
-  Short: &#x27;Short&#x27;,
-  Medium: &#x27;Medium&#x27;,
-  Long: &#x27;Long&#x27;,
-  Blonde: &#x27;Blonde&#x27;,
-  Blond: &#x27;Ash Blond&#x27;,
-  Grey: &#x27;Grey&#x27;,
-  Dark: &#x27;Black&#x27;,
-  Brown: &#x27;Brown&#x27;,
-  Red: &#x27;Red&#x27;,
-  Green: &#x27;Green&#x27;,
-  Blue: &#x27;Blue&#x27;,
-  Hazel: &#x27;Hazel&#x27;,
-  Tall: &#x27;Tall&#x27;,
-  Average: &#x27;Average&#x27;,
-  Slim: &#x27;Slim&#x27;,
-  Fat: &#x27;Fat&#x27;,
-  Plump: &#x27;Plump&#x27;
+  gender: 'Gender',
+  facialHair: 'Facial Hair',
+  upperWear: 'TOPS',
+  lowerWear: 'BOTTOMS',
+  shoes: 'Shoes',
+  Female: 'Female',
+  Male: 'Male',
+  Clean: 'Clean Shaven',
+  Mustache: 'Mustache',
+  Beard: 'Beard',
+  hairStyle: 'HAIRSTYLE',
+  hairLength: 'Hair Length',
+  hairColor: 'Hair Color',
+  eyeColor: 'Eye Color',
+  height: 'Height',
+  bodyType: 'Body Type',
+  'T-shirt': 'T-shirt',
+  'Shirt': 'Shirt',
+  'Sweatshirt': 'Sweatshirt',
+  'Raincoat': 'Raincoat',
+  'Jumper': 'Jumper',
+  'Suit': 'Suit',
+  'Jacket': 'Jacket',
+  'Lab coat': 'Lab coat',
+  'Police Uniform': 'Police Uniform',
+  'Firefighter Uniform': 'Firefighter Uniform',
+  'Workers Vest': 'Workers Vest',
+  "Worker's Overalls": "Worker's Overalls",
+  'Trousers': 'Trousers',
+  'Jeans': 'Jeans',
+  'Skirt': 'Skirt',
+  'Dress': 'Dress',
+  'Suit-Pants': 'Suit-Pants',
+  'Sweatpants': 'Sweatpants',
+  'Sneakers': 'Sneakers',
+  'Boots': 'Boots',
+  'High heels': 'High heels',
+  'Classic': 'Classic',
+  'Long boots': 'Long boots',
+  None: 'Bald',
+  Hat: 'Hat',
+  'Police Hat': 'Police Hat',
+  'Firefighter Hat': 'Firefighter Hat',
+  'Chef Hat': 'Chef Hat',
+  'Hard hat': 'Hard hat',
+  'Stethoscope': 'Stethoscope',
+  Gloves: 'Gloves',
+  Watch: 'Watch',
+  Glasses: 'Glasses',
+  Sunglasses: 'Sunglasses',
+  Bag: 'Bag',
+  Necklace: 'Necklace',
+  Scarf: 'Scarf',
+  Tie: 'Tie',
+  Earrings: 'Earrings',
+  Umbrella: 'Umbrella',
+  Belt: 'Belt',
+  Straight: 'Straight',
+  Wavy: 'Wavy',
+  Curly: 'Curly',
+  Short: 'Short',
+  Medium: 'Medium',
+  Long: 'Long',
+  Blonde: 'Blonde',
+  Blond: 'Ash Blond',
+  Grey: 'Grey',
+  Dark: 'Black',
+  Brown: 'Brown',
+  Red: 'Red',
+  Green: 'Green',
+  Blue: 'Blue',
+  Hazel: 'Hazel',
+  Tall: 'Tall',
+  Average: 'Average',
+  Slim: 'Slim',
+  Fat: 'Fat',
+  Plump: 'Plump'
 };
 const INITIAL_CHARACTER = {
-  gender: &#x27;Male&#x27;,
-  facialHair: &#x27;Clean&#x27;,
-  upperWear: &#x27;Shirt&#x27;,
-  lowerWear: &#x27;Suit-Pants&#x27;,
-  shoes: &#x27;Classic&#x27;,
+  gender: 'Male',
+  facialHair: 'Clean',
+  upperWear: 'Shirt',
+  lowerWear: 'Suit-Pants',
+  shoes: 'Classic',
   accessories: [],
-  hairStyle: &#x27;Straight&#x27;,
-  hairLength: &#x27;Short&#x27;,
-  hairColor: &#x27;Brown&#x27;,
-  eyeColor: &#x27;Green&#x27;,
-  height: &#x27;Medium&#x27;,
-  bodyType: &#x27;Average&#x27;
+  hairStyle: 'Straight',
+  hairLength: 'Short',
+  hairColor: 'Brown',
+  eyeColor: 'Green',
+  height: 'Medium',
+  bodyType: 'Average'
 };
 
 // Sound Effects Synthesizer - Works without internet, audio files, or Google services!
 
-const playSoundEffect = type =&gt; {
+const playSoundEffect = type => {
   try {
+    if (window.speechSynthesis?.speaking) return;
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
-    if (ctx.state === &#x27;suspended&#x27;) {
+    if (ctx.state === 'suspended') {
       ctx.resume();
     }
+    setTimeout(() => {
+      ctx.close().catch(() => {});
+    }, 1000);
     const now = ctx.currentTime;
-    if (type === &#x27;click&#x27;) {
+    if (type === 'click') {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = &#x27;sine&#x27;;
+      osc.type = 'sine';
       osc.frequency.setValueAtTime(600, now);
       osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
       gain.gain.setValueAtTime(0.15, now);
@@ -1773,14 +258,14 @@ const playSoundEffect = type =&gt; {
       gain.connect(ctx.destination);
       osc.start(now);
       osc.stop(now + 0.05);
-    } else if (type === &#x27;success&#x27;) {
-      // Cheerful chime (C5 -&gt; E5 -&gt; G5 -&gt; C6)
+    } else if (type === 'success') {
+      // Cheerful chime (C5 -> E5 -> G5 -> C6)
 
       const freqs = [523.25, 659.25, 783.99, 1046.50];
-      freqs.forEach((f, i) =&gt; {
+      freqs.forEach((f, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = &#x27;triangle&#x27;;
+        osc.type = 'triangle';
         osc.frequency.setValueAtTime(f, now + i * 0.08);
         gain.gain.setValueAtTime(0.2, now + i * 0.08);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.25);
@@ -1789,10 +274,10 @@ const playSoundEffect = type =&gt; {
         osc.start(now + i * 0.08);
         osc.stop(now + i * 0.08 + 0.25);
       });
-    } else if (type === &#x27;error&#x27;) {
+    } else if (type === 'error') {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = &#x27;sawtooth&#x27;;
+      osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(220, now);
       osc.frequency.setValueAtTime(180, now + 0.1);
       gain.gain.setValueAtTime(0.15, now);
@@ -1810,39 +295,49 @@ const playSoundEffect = type =&gt; {
 
 // Safe Speech Synthesis Engine - Avoids Google Auth / Incognito Speech network errors
 
-const safeSpeak = (text, onStart, onEnd) =&gt; {
+let activeUtterance = null;
+const safeSpeak = (text, onStart, onEnd) => {
   try {
-    if (!(&#x27;speechSynthesis&#x27; in window)) {
-      if (onEnd) onEnd();
+    if (!window.speechSynthesis) {
+      onEnd?.();
       return;
     }
-    window.speechSynthesis.cancel(); // Reset active audio queue
-
+    const synth = window.speechSynthesis;
+    synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.85; // Slower speed ideal for young ESL students
-
-    utterance.pitch = 1.0;
-
-    // Filter available voices: Prefer local native OS voices to prevent Chrome Incognito online speech failures
-
-    const voices = window.speechSynthesis.getVoices();
-    const englishVoices = voices.filter(v =&gt; v.lang &amp;&amp; v.lang.toLowerCase().startsWith(&#x27;en&#x27;));
-
-    // Pick local offline voice if possible
-
-    const localEnglish = englishVoices.find(v =&gt; v.localService) || englishVoices[0] || voices.find(v =&gt; v.localService) || voices[0];
-    if (localEnglish) {
-      utterance.voice = localEnglish;
+    activeUtterance = utterance;
+    utterance.lang = 'en-US';
+    utterance.volume = 1;
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    const voices = synth.getVoices().filter(v => /^en(?:-|$)/i.test(v.lang));
+    const selected = document.getElementById('speech-voice')?.value;
+    const voice = voices.find(v => v.voiceURI === selected) || voices.find(v => v.localService && /^en-US$/i.test(v.lang)) || voices.find(v => v.localService) || voices[0];
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
     }
-    if (onStart) utterance.onstart = onStart;
-    if (onEnd) {
-      utterance.onend = onEnd;
-      utterance.onerror = () =&gt; onEnd();
-    }
-    window.speechSynthesis.speak(utterance);
+    const status = document.getElementById('speech-status');
+    utterance.onstart = () => {
+      if (status) status.textContent = '';
+      onStart?.();
+    };
+    const finish = () => {
+      if (activeUtterance === utterance) {
+        activeUtterance = null;
+        onEnd?.();
+      }
+    };
+    utterance.onend = finish;
+    utterance.onerror = e => {
+      if (activeUtterance === utterance && status && !['canceled', 'interrupted'].includes(e.error)) status.textContent = 'Audio could not be played. Choose another English voice and press Listen again.';
+      finish();
+    };
+    synth.resume();
+    synth.speak(utterance);
   } catch (e) {
-    console.warn(&quot;Speech API unavailable, falling back to text presentation.&quot;, e);
-    if (onEnd) onEnd();
+    console.warn('Speech unavailable', e);
+    onEnd?.();
   }
 };
 class ErrorBoundary extends React.Component {
@@ -1858,47 +353,47 @@ class ErrorBoundary extends React.Component {
     };
   }
   componentDidCatch(error, errorInfo) {
-    console.error(&quot;App Error:&quot;, error, errorInfo);
+    console.error("App Error:", error, errorInfo);
   }
   render() {
     if (this.state.hasError) {
-      return /*#__PURE__*/React.createElement(&quot;div&quot;, {
-        className: &quot;min-h-screen flex flex-col items-center justify-center bg-slate-100 p-6 text-center&quot;
-      }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-        className: &quot;bg-white p-8 rounded-3xl shadow-xl max-w-md border-4 border-indigo-100&quot;
-      }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-        className: &quot;text-5xl mb-4&quot;
-      }, &quot;\uD83C\uDFA8&quot;), /*#__PURE__*/React.createElement(&quot;h1&quot;, {
-        className: &quot;text-2xl font-black text-slate-800 mb-2&quot;
-      }, &quot;Ops! Bir \u015Feyler ters gitti.&quot;), /*#__PURE__*/React.createElement(&quot;p&quot;, {
-        className: &quot;text-slate-600 mb-6 text-sm&quot;
-      }, &quot;Gizli sekme k\u0131s\u0131tlamalar\u0131 nedeniyle uygulama yenilendi. Giri\u015F yapman\u0131z gerekmez!&quot;), /*#__PURE__*/React.createElement(&quot;button&quot;, {
-        onClick: () =&gt; {
+      return /*#__PURE__*/React.createElement("div", {
+        className: "min-h-screen flex flex-col items-center justify-center bg-slate-100 p-6 text-center"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "bg-white p-8 rounded-3xl shadow-xl max-w-md border-4 border-indigo-100"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "text-5xl mb-4"
+      }, "\uD83C\uDFA8"), /*#__PURE__*/React.createElement("h1", {
+        className: "text-2xl font-black text-slate-800 mb-2"
+      }, "Oops! Something went wrong."), /*#__PURE__*/React.createElement("p", {
+        className: "text-slate-600 mb-6 text-sm"
+      }, "Please restart the application and try again."), /*#__PURE__*/React.createElement("button", {
+        onClick: () => {
           this.setState({
             hasError: false
           });
           window.location.reload();
         },
-        className: &quot;w-full py-3 bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all text-white rounded-xl font-bold text-sm shadow-lg&quot;
-      }, &quot;Uygulamay\u0131 Tekrar Ba\u015Flat&quot;)));
+        className: "w-full py-3 bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all text-white rounded-xl font-bold text-sm shadow-lg"
+      }, "Restart Application")));
     }
     return this.props.children;
   }
 }
 function CharacterApp() {
   const [activeSlot, setActiveSlot] = useState(0);
-  const [characters, setCharacters] = useState(() =&gt; Array(6).fill(null).map(() =&gt; ({
+  const [characters, setCharacters] = useState(() => Array(6).fill(null).map(() => ({
     ...INITIAL_CHARACTER
   })));
 
-  // Game Mode: &#x27;free&#x27; (Design Mode) or &#x27;challenge&#x27; (Listen &amp; Build Mode)
+  // Game Mode: 'free' (Design Mode) or 'challenge' (Listen & Build Mode)
 
-  const [gameMode, setGameMode] = useState(&#x27;free&#x27;); // &#x27;free&#x27; | &#x27;challenge&#x27;
+  const [gameMode, setGameMode] = useState('free'); // 'free' | 'challenge'
 
-  const [difficulty, setDifficulty] = useState(&#x27;medium&#x27;); // &#x27;easy&#x27; | &#x27;medium&#x27; | &#x27;hard&#x27;
+  const [difficulty, setDifficulty] = useState('medium'); // 'easy' | 'medium' | 'hard'
 
   const [targetChar, setTargetChar] = useState(null);
-  const [speechPrompt, setSpeechPrompt] = useState(&#x27;&#x27;);
+  const [speechPrompt, setSpeechPrompt] = useState('');
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [showHintText, setShowHintText] = useState(false);
   const [feedback, setFeedback] = useState(null); // { isSuccess: boolean, score: number, details: Array }
@@ -1906,68 +401,68 @@ function CharacterApp() {
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const character = characters[activeSlot] || INITIAL_CHARACTER;
-  const updateTrait = (trait, value) =&gt; {
-    playSoundEffect(&#x27;click&#x27;);
-    setCharacters(prev =&gt; {
+  const updateTrait = (trait, value) => {
+    playSoundEffect('click');
+    setCharacters(prev => {
       const newChars = [...prev];
       let char = {
         ...newChars[activeSlot],
         [trait]: value
       };
-      if (trait === &#x27;gender&#x27; &amp;&amp; value === &#x27;Male&#x27;) {
-        char.accessories = (char.accessories || []).filter(acc =&gt; acc !== &#x27;Earrings&#x27;);
-        if (char.lowerWear === &#x27;Skirt&#x27;) char.lowerWear = &#x27;Suit-Pants&#x27;;
-        if (char.upperWear === &#x27;Dress&#x27;) char.upperWear = &#x27;Shirt&#x27;;
-        if (char.shoes === &#x27;High heels&#x27;) char.shoes = &#x27;Classic&#x27;;
+      if (trait === 'gender' && value === 'Male') {
+        char.accessories = (char.accessories || []).filter(acc => acc !== 'Earrings');
+        if (char.lowerWear === 'Skirt') char.lowerWear = 'Suit-Pants';
+        if (char.upperWear === 'Dress') char.upperWear = 'Shirt';
+        if (char.shoes === 'High heels') char.shoes = 'Classic';
       }
-      if (trait === &#x27;upperWear&#x27; &amp;&amp; value === &#x27;Suit&#x27;) {
-        char.lowerWear = &#x27;Suit-Pants&#x27;;
-        char.shoes = &#x27;Classic&#x27;;
+      if (trait === 'upperWear' && value === 'Suit') {
+        char.lowerWear = 'Suit-Pants';
+        char.shoes = 'Classic';
       }
-      if (trait === &#x27;upperWear&#x27; &amp;&amp; value === &quot;Worker&#x27;s Overalls&quot;) {
-        char.lowerWear = &#x27;Jeans&#x27;;
+      if (trait === 'upperWear' && value === "Worker's Overalls") {
+        char.lowerWear = 'Jeans';
       }
       newChars[activeSlot] = char;
       return newChars;
     });
   };
-  const toggleAccessory = acc =&gt; {
-    playSoundEffect(&#x27;click&#x27;);
-    setCharacters(prev =&gt; {
+  const toggleAccessory = acc => {
+    playSoundEffect('click');
+    setCharacters(prev => {
       const newChars = [...prev];
       const char = {
         ...newChars[activeSlot]
       };
       const currentAccs = char.accessories || [];
       const isSelected = currentAccs.includes(acc);
-      let newAccs = isSelected ? currentAccs.filter(a =&gt; a !== acc) : [...currentAccs, acc];
-      const hats = [&#x27;Hat&#x27;, &#x27;Police Hat&#x27;, &#x27;Firefighter Hat&#x27;, &#x27;Chef Hat&#x27;, &#x27;Hard hat&#x27;];
-      if (!isSelected &amp;&amp; hats.includes(acc)) {
-        newAccs = newAccs.filter(a =&gt; !hats.includes(a) || a === acc);
+      let newAccs = isSelected ? currentAccs.filter(a => a !== acc) : [...currentAccs, acc];
+      const hats = ['Hat', 'Police Hat', 'Firefighter Hat', 'Chef Hat', 'Hard hat'];
+      if (!isSelected && hats.includes(acc)) {
+        newAccs = newAccs.filter(a => !hats.includes(a) || a === acc);
       }
       char.accessories = newAccs;
       newChars[activeSlot] = char;
       return newChars;
     });
   };
-  const generateRandomCharacter = useCallback(() =&gt; {
-    const getRandom = arr =&gt; arr[Math.floor(Math.random() * arr.length)];
+  const generateRandomCharacter = useCallback(() => {
+    const getRandom = arr => arr[Math.floor(Math.random() * arr.length)];
     const gender = getRandom(OPTIONS.gender);
-    const isMale = gender === &#x27;Male&#x27;;
-    const availableUpper = OPTIONS.upperWear.filter(u =&gt; !(isMale &amp;&amp; u === &#x27;Dress&#x27;));
+    const isMale = gender === 'Male';
+    const availableUpper = OPTIONS.upperWear.filter(u => !(isMale && u === 'Dress'));
     const upperWear = getRandom(availableUpper);
-    let availableLower = OPTIONS.lowerWear.filter(l =&gt; !(isMale &amp;&amp; l === &#x27;Skirt&#x27;));
-    if (upperWear === &#x27;Suit&#x27;) availableLower = [&#x27;Suit-Pants&#x27;];
+    let availableLower = OPTIONS.lowerWear.filter(l => !(isMale && l === 'Skirt'));
+    if (upperWear === 'Suit') availableLower = ['Suit-Pants'];
     const lowerWear = getRandom(availableLower);
-    let availableShoes = OPTIONS.shoes.filter(s =&gt; !(isMale &amp;&amp; s === &#x27;High heels&#x27;));
-    if (upperWear === &#x27;Suit&#x27;) availableShoes = [&#x27;Classic&#x27;];
+    let availableShoes = OPTIONS.shoes.filter(s => !(isMale && s === 'High heels'));
+    if (upperWear === 'Suit') availableShoes = ['Classic'];
     const shoes = getRandom(availableShoes);
-    const facialHair = isMale ? getRandom(OPTIONS.facialHair) : &#x27;Clean&#x27;;
-    const hairStyle = isMale ? getRandom(OPTIONS.hairStyle) : getRandom(OPTIONS.hairStyle.filter(s =&gt; s !== &#x27;None&#x27;));
+    const facialHair = isMale ? getRandom(OPTIONS.facialHair) : 'Clean';
+    const hairStyle = isMale ? getRandom(OPTIONS.hairStyle) : getRandom(OPTIONS.hairStyle.filter(s => s !== 'None'));
     const numAccessories = Math.floor(Math.random() * 2);
-    const validAccessories = OPTIONS.accessories.filter(a =&gt; !(isMale &amp;&amp; a === &#x27;Earrings&#x27;));
-    const shuffledAccs = [...validAccessories].sort(() =&gt; 0.5 - Math.random());
-    const hats = [&#x27;Hat&#x27;, &#x27;Police Hat&#x27;, &#x27;Firefighter Hat&#x27;, &#x27;Chef Hat&#x27;, &#x27;Hard hat&#x27;];
+    const validAccessories = OPTIONS.accessories.filter(a => !(isMale && a === 'Earrings'));
+    const shuffledAccs = [...validAccessories].sort(() => 0.5 - Math.random());
+    const hats = ['Hat', 'Police Hat', 'Firefighter Hat', 'Chef Hat', 'Hard hat'];
     const selectedAccs = [];
     let hasHatSelected = false;
     for (const item of shuffledAccs.slice(0, numAccessories)) {
@@ -1995,10 +490,10 @@ function CharacterApp() {
       bodyType: getRandom(OPTIONS.bodyType)
     };
   }, []);
-  const randomizeCurrentSlot = () =&gt; {
-    playSoundEffect(&#x27;click&#x27;);
+  const randomizeCurrentSlot = () => {
+    playSoundEffect('click');
     const newChar = generateRandomCharacter();
-    setCharacters(prev =&gt; {
+    setCharacters(prev => {
       const newChars = [...prev];
       newChars[activeSlot] = newChar;
       return newChars;
@@ -2007,29 +502,29 @@ function CharacterApp() {
 
   // Generates clean, simple English descriptions suitable for kids
 
-  const createDescriptionFromChar = char =&gt; {
+  const createDescriptionFromChar = char => {
     const parts = [];
-    const pronoun = char.gender === &#x27;Male&#x27; ? &#x27;He&#x27; : &#x27;She&#x27;;
-    const possessive = char.gender === &#x27;Male&#x27; ? &#x27;His&#x27; : &#x27;Her&#x27;;
+    const pronoun = char.gender === 'Male' ? 'He' : 'She';
+    const possessive = char.gender === 'Male' ? 'His' : 'Her';
     parts.push(`${pronoun} is a ${char.height.toLowerCase()} ${char.gender.toLowerCase()}.`);
-    if (char.hairStyle === &#x27;None&#x27;) {
+    if (char.hairStyle === 'None') {
       parts.push(`${pronoun} is bald.`);
     } else {
       parts.push(`${pronoun} has ${char.hairLength.toLowerCase()} ${char.hairStyle.toLowerCase()} ${char.hairColor.toLowerCase()} hair.`);
     }
     parts.push(`${possessive} eyes are ${char.eyeColor.toLowerCase()}.`);
-    if (char.upperWear === &#x27;Dress&#x27;) {
+    if (char.upperWear === 'Dress') {
       parts.push(`${pronoun} is wearing a ${char.upperWear}.`);
     } else {
       parts.push(`${pronoun} is wearing a ${char.upperWear} and ${char.lowerWear}.`);
     }
-    if (char.accessories &amp;&amp; char.accessories.length &gt; 0) {
-      parts.push(`${pronoun} has a ${char.accessories.join(&#x27; and &#x27;)}.`);
+    if (char.accessories && char.accessories.length > 0) {
+      parts.push(`${pronoun} has a ${char.accessories.join(' and ')}.`);
     }
-    return parts.join(&#x27; &#x27;);
+    return parts.join(' ');
   };
-  const startNewChallenge = useCallback(() =&gt; {
-    playSoundEffect(&#x27;click&#x27;);
+  const startNewChallenge = useCallback(() => {
+    playSoundEffect('click');
     const newTarget = generateRandomCharacter();
     setTargetChar(newTarget);
     setFeedback(null);
@@ -2042,59 +537,59 @@ function CharacterApp() {
 
     // Speak automatically
 
-    safeSpeak(promptText, () =&gt; setIsPlayingAudio(true), () =&gt; setIsPlayingAudio(false));
+    safeSpeak(promptText, () => setIsPlayingAudio(true), () => setIsPlayingAudio(false));
   }, [generateRandomCharacter]);
-  useEffect(() =&gt; {
-    if (gameMode === &#x27;challenge&#x27; &amp;&amp; !targetChar) {
+  useEffect(() => {
+    if (gameMode === 'challenge' && !targetChar) {
       startNewChallenge();
     }
   }, [gameMode, targetChar, startNewChallenge]);
-  const handlePlayAudio = () =&gt; {
-    playSoundEffect(&#x27;click&#x27;);
+  const handlePlayAudio = () => {
+    playSoundEffect('click');
     if (!speechPrompt) return;
-    safeSpeak(speechPrompt, () =&gt; setIsPlayingAudio(true), () =&gt; setIsPlayingAudio(false));
+    safeSpeak(speechPrompt, () => setIsPlayingAudio(true), () => setIsPlayingAudio(false));
   };
-  const checkAnswer = () =&gt; {
+  const checkAnswer = () => {
     if (!targetChar) return;
     const checks = [{
-      name: &#x27;Gender&#x27;,
+      name: 'Gender',
       match: character.gender === targetChar.gender,
       expected: targetChar.gender,
       current: character.gender
     }, {
-      name: &#x27;Height&#x27;,
+      name: 'Height',
       match: character.height === targetChar.height,
       expected: targetChar.height,
       current: character.height
     }, {
-      name: &#x27;Hair Color&#x27;,
-      match: character.hairStyle === &#x27;None&#x27; || character.hairColor === targetChar.hairColor,
+      name: 'Hair Color',
+      match: character.hairStyle === 'None' || character.hairColor === targetChar.hairColor,
       expected: targetChar.hairColor,
       current: character.hairColor
     }, {
-      name: &#x27;Eye Color&#x27;,
+      name: 'Eye Color',
       match: character.eyeColor === targetChar.eyeColor,
       expected: targetChar.eyeColor,
       current: character.eyeColor
     }, {
-      name: &#x27;Tops&#x27;,
+      name: 'Tops',
       match: character.upperWear === targetChar.upperWear,
       expected: targetChar.upperWear,
       current: character.upperWear
     }, {
-      name: &#x27;Bottoms&#x27;,
-      match: character.upperWear === &#x27;Dress&#x27; || character.lowerWear === targetChar.lowerWear,
+      name: 'Bottoms',
+      match: character.upperWear === 'Dress' || character.lowerWear === targetChar.lowerWear,
       expected: targetChar.lowerWear,
       current: character.lowerWear
     }];
-    const correctCount = checks.filter(c =&gt; c.match).length;
+    const correctCount = checks.filter(c => c.match).length;
     const isSuccess = correctCount === checks.length;
     if (isSuccess) {
-      playSoundEffect(&#x27;success&#x27;);
-      setScore(s =&gt; s + 100);
-      setStreak(s =&gt; s + 1);
+      playSoundEffect('success');
+      setScore(s => s + 100);
+      setStreak(s => s + 1);
     } else {
-      playSoundEffect(&#x27;error&#x27;);
+      playSoundEffect('error');
       setStreak(0);
     }
     setFeedback({
@@ -2104,360 +599,358 @@ function CharacterApp() {
       checks
     });
   };
-  const isMale = character?.gender === &#x27;Male&#x27;;
-  const hasAccessory = name =&gt; character?.accessories?.includes(name) || false;
-  const hasHat = hasAccessory(&#x27;Hat&#x27;);
-  const hasPoliceHat = hasAccessory(&#x27;Police Hat&#x27;);
-  const hasFireHat = hasAccessory(&#x27;Firefighter Hat&#x27;);
-  const hasChefHat = hasAccessory(&#x27;Chef Hat&#x27;);
-  const hasHardHat = hasAccessory(&#x27;Hard hat&#x27;);
-  const hasStethoscope = hasAccessory(&#x27;Stethoscope&#x27;);
-  const hasGloves = hasAccessory(&#x27;Gloves&#x27;);
-  const hasWatch = hasAccessory(&#x27;Watch&#x27;);
-  const hasGlasses = hasAccessory(&#x27;Glasses&#x27;);
-  const hasSunglasses = hasAccessory(&#x27;Sunglasses&#x27;);
-  const hasBag = hasAccessory(&#x27;Bag&#x27;);
-  const hasNecklace = hasAccessory(&#x27;Necklace&#x27;);
-  const hasScarf = hasAccessory(&#x27;Scarf&#x27;);
-  const hasTie = hasAccessory(&#x27;Tie&#x27;);
-  const hasEarrings = hasAccessory(&#x27;Earrings&#x27;);
-  const hasUmbrella = hasAccessory(&#x27;Umbrella&#x27;);
-  const hasBelt = hasAccessory(&#x27;Belt&#x27;);
-  const isDress = character.upperWear === &#x27;Dress&#x27;;
-  const isBald = character.hairStyle === &#x27;None&#x27;;
-  const torsoHeight = character.height === &#x27;Tall&#x27; ? 140 : character.height === &#x27;Medium&#x27; ? 110 : 80;
-  const upperWearHeight = character.upperWear === &#x27;Raincoat&#x27; ? torsoHeight + 30 : torsoHeight;
-  const legHeight = character.height === &#x27;Tall&#x27; ? 130 : character.height === &#x27;Medium&#x27; ? 100 : 70;
-  const torsoWidth = character.bodyType === &#x27;Fat&#x27; ? 110 : character.bodyType === &#x27;Plump&#x27; ? 90 : character.bodyType === &#x27;Average&#x27; ? 70 : 50;
-  const legWidth = character.bodyType === &#x27;Fat&#x27; ? 36 : character.bodyType === &#x27;Plump&#x27; ? 28 : character.bodyType === &#x27;Average&#x27; ? 22 : 16;
-  const armWidth = character.bodyType === &#x27;Fat&#x27; ? 18 : character.bodyType === &#x27;Plump&#x27; ? 16 : character.bodyType === &#x27;Average&#x27; ? 14 : 12;
+  const isMale = character?.gender === 'Male';
+  const hasAccessory = name => character?.accessories?.includes(name) || false;
+  const hasHat = hasAccessory('Hat');
+  const hasPoliceHat = hasAccessory('Police Hat');
+  const hasFireHat = hasAccessory('Firefighter Hat');
+  const hasChefHat = hasAccessory('Chef Hat');
+  const hasHardHat = hasAccessory('Hard hat');
+  const hasStethoscope = hasAccessory('Stethoscope');
+  const hasGloves = hasAccessory('Gloves');
+  const hasWatch = hasAccessory('Watch');
+  const hasGlasses = hasAccessory('Glasses');
+  const hasSunglasses = hasAccessory('Sunglasses');
+  const hasBag = hasAccessory('Bag');
+  const hasNecklace = hasAccessory('Necklace');
+  const hasScarf = hasAccessory('Scarf');
+  const hasTie = hasAccessory('Tie');
+  const hasEarrings = hasAccessory('Earrings');
+  const hasUmbrella = hasAccessory('Umbrella');
+  const hasBelt = hasAccessory('Belt');
+  const isDress = character.upperWear === 'Dress';
+  const isBald = character.hairStyle === 'None';
+  const torsoHeight = character.height === 'Tall' ? 140 : character.height === 'Medium' ? 110 : 80;
+  const upperWearHeight = character.upperWear === 'Raincoat' ? torsoHeight + 30 : torsoHeight;
+  const legHeight = character.height === 'Tall' ? 130 : character.height === 'Medium' ? 100 : 70;
+  const torsoWidth = character.bodyType === 'Fat' ? 110 : character.bodyType === 'Plump' ? 90 : character.bodyType === 'Average' ? 70 : 50;
+  const legWidth = character.bodyType === 'Fat' ? 36 : character.bodyType === 'Plump' ? 28 : character.bodyType === 'Average' ? 22 : 16;
+  const armWidth = character.bodyType === 'Fat' ? 18 : character.bodyType === 'Plump' ? 16 : character.bodyType === 'Average' ? 14 : 12;
   const centerX = 150;
   const headY = 80;
   const neckY = 105;
   const torsoY = 125;
   const armHeight = torsoHeight * 0.7;
   const pantsY = torsoY + torsoHeight - 15;
-  let hairLengthFactor = isMale ? character.hairLength === &#x27;Short&#x27; ? 0.05 : character.hairLength === &#x27;Medium&#x27; ? 0.35 : 0.85 : character.hairLength === &#x27;Short&#x27; ? 0.05 : character.hairLength === &#x27;Medium&#x27; ? 0.25 : 0.7;
+  let hairLengthFactor = isMale ? character.hairLength === 'Short' ? 0.05 : character.hairLength === 'Medium' ? 0.35 : 0.85 : character.hairLength === 'Short' ? 0.05 : character.hairLength === 'Medium' ? 0.25 : 0.7;
   const hairEndY = torsoY + torsoHeight * hairLengthFactor;
-  const hairColorHex = COLORS.hair[character.hairColor] || &#x27;#713f12&#x27;;
-  const eyeColorHex = COLORS.eye[character.eyeColor] || &#x27;#16a34a&#x27;;
+  const hairColorHex = COLORS.hair[character.hairColor] || '#713f12';
+  const eyeColorHex = COLORS.eye[character.eyeColor] || '#16a34a';
   const Fingers = ({
     side
-  }) =&gt; {
-    const handX = side === &#x27;left&#x27; ? centerX - torsoWidth / 2 - armWidth + 2 : centerX + torsoWidth / 2 - 2;
+  }) => {
+    const handX = side === 'left' ? centerX - torsoWidth / 2 - armWidth + 2 : centerX + torsoWidth / 2 - 2;
     const handY = torsoY + 10 + armHeight;
     const fSpace = armWidth / 4;
     const skinColor = hasGloves ? COLORS.clothing.Gloves : COLORS.skin;
-    return /*#__PURE__*/React.createElement(&quot;g&quot;, {
+    return /*#__PURE__*/React.createElement("g", {
       fill: skinColor
-    }, /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+    }, /*#__PURE__*/React.createElement("circle", {
       cx: handX + armWidth / 2,
       cy: handY,
       r: armWidth / 2 + 1
-    }), [0, 1, 2, 3].map(i =&gt; /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+    }), [0, 1, 2, 3].map(i => /*#__PURE__*/React.createElement("rect", {
       key: i,
       x: handX + i * fSpace,
       y: handY,
       width: fSpace - 1,
-      height: &quot;10&quot;,
-      rx: &quot;2&quot;
-    })), hasWatch &amp;&amp; side === &#x27;left&#x27; &amp;&amp; /*#__PURE__*/React.createElement(&quot;g&quot;, {
+      height: "10",
+      rx: "2"
+    })), hasWatch && side === 'left' && /*#__PURE__*/React.createElement("g", {
       transform: `translate(${handX}, ${handY - 15})`
-    }, /*#__PURE__*/React.createElement(&quot;rect&quot;, {
-      x: &quot;0&quot;,
-      y: &quot;0&quot;,
+    }, /*#__PURE__*/React.createElement("rect", {
+      x: "0",
+      y: "0",
       width: armWidth,
-      height: &quot;6&quot;,
+      height: "6",
       fill: COLORS.clothing.Watch
-    }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+    }), /*#__PURE__*/React.createElement("circle", {
       cx: armWidth / 2,
-      cy: &quot;3&quot;,
-      r: &quot;4&quot;,
-      fill: &quot;#cbd5e1&quot;,
+      cy: "3",
+      r: "4",
+      fill: "#cbd5e1",
       stroke: COLORS.clothing.Watch,
-      strokeWidth: &quot;1&quot;
+      strokeWidth: "1"
     })));
   };
-  const BackHair = () =&gt; {
+  const BackHair = () => {
     if (isBald || hasChefHat) return null;
-    if (isMale &amp;&amp; character.hairLength !== &#x27;Long&#x27;) return null;
-    if (character.hairStyle === &#x27;Straight&#x27;) return /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+    if (isMale && character.hairLength !== 'Long') return null;
+    if (character.hairStyle === 'Straight') return /*#__PURE__*/React.createElement("rect", {
       x: centerX - 40,
       y: headY - 10,
-      width: &quot;80&quot;,
+      width: "80",
       height: hairEndY - (headY - 10),
-      rx: &quot;5&quot;,
+      rx: "5",
       fill: hairColorHex
     });
-    if (character.hairStyle === &#x27;Wavy&#x27;) return /*#__PURE__*/React.createElement(&quot;path&quot;, {
+    if (character.hairStyle === 'Wavy') return /*#__PURE__*/React.createElement("path", {
       d: `M ${centerX - 35} ${headY - 10} C ${centerX - 50} ${headY + 30}, ${centerX - 20} ${hairEndY - 20}, ${centerX - 40} ${hairEndY} L ${centerX + 40} ${hairEndY} C ${centerX + 20} ${hairEndY - 20}, ${centerX + 50} ${headY + 30}, ${centerX + 35} ${headY - 10} Z`,
       fill: hairColorHex
     });
-    if (character.hairStyle === &#x27;Curly&#x27;) {
+    if (character.hairStyle === 'Curly') {
       const cy1 = headY + (hairEndY - headY) * 0.3;
       const cy2 = headY + (hairEndY - headY) * 0.7;
-      return /*#__PURE__*/React.createElement(&quot;g&quot;, {
+      return /*#__PURE__*/React.createElement("g", {
         fill: hairColorHex
-      }, /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+      }, /*#__PURE__*/React.createElement("rect", {
         x: centerX - 35,
         y: headY - 10,
-        width: &quot;70&quot;,
+        width: "70",
         height: hairEndY - headY
-      }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+      }), /*#__PURE__*/React.createElement("circle", {
         cx: centerX - 35,
         cy: cy1,
-        r: &quot;25&quot;
-      }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+        r: "25"
+      }), /*#__PURE__*/React.createElement("circle", {
         cx: centerX + 35,
         cy: cy1,
-        r: &quot;25&quot;
-      }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+        r: "25"
+      }), /*#__PURE__*/React.createElement("circle", {
         cx: centerX - 38,
         cy: cy2,
-        r: &quot;25&quot;
-      }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+        r: "25"
+      }), /*#__PURE__*/React.createElement("circle", {
         cx: centerX + 38,
         cy: cy2,
-        r: &quot;25&quot;
+        r: "25"
       }));
     }
     return null;
   };
-  const FrontHair = () =&gt; {
+  const FrontHair = () => {
     if (isBald) return null;
     const isWearingHat = hasHat || hasPoliceHat || hasFireHat || hasChefHat || hasHardHat;
     const hairContainerStyles = isWearingHat ? {
-      clipPath: &#x27;inset(18px 0 0 0)&#x27;
+      clipPath: 'inset(18px 0 0 0)'
     } : {};
     if (isMale) {
       const len = character.hairLength;
-      const topOffset = len === &#x27;Short&#x27; ? 35 : len === &#x27;Medium&#x27; ? 48 : 58;
-      const sideY = len === &#x27;Short&#x27; ? headY + 2 : len === &#x27;Medium&#x27; ? headY + 12 : headY + 32;
-      return /*#__PURE__*/React.createElement(&quot;g&quot;, {
+      const topOffset = len === 'Short' ? 35 : len === 'Medium' ? 48 : 58;
+      const sideY = len === 'Short' ? headY + 2 : len === 'Medium' ? headY + 12 : headY + 32;
+      return /*#__PURE__*/React.createElement("g", {
         style: hairContainerStyles,
         fill: hairColorHex
-      }, character.hairStyle === &#x27;Straight&#x27; &amp;&amp; /*#__PURE__*/React.createElement(&quot;g&quot;, null, /*#__PURE__*/React.createElement(&quot;path&quot;, {
+      }, character.hairStyle === 'Straight' && /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
         d: `M ${centerX - 32} ${headY - 12} L ${centerX + 32} ${headY - 12} Q ${centerX + 35} ${headY - topOffset} ${centerX} ${headY - topOffset - 3} Q ${centerX - 35} ${headY - topOffset} ${centerX - 32} ${headY - 12}`
-      }), /*#__PURE__*/React.createElement(&quot;path&quot;, {
+      }), /*#__PURE__*/React.createElement("path", {
         d: `M ${centerX - 15} ${headY - topOffset + 4} Q ${centerX - 10} ${headY - topOffset + 2} ${centerX} ${headY - topOffset} L ${centerX - 5} ${headY - 30} Z`,
-        fill: &quot;white&quot;,
-        opacity: &quot;0.1&quot;
-      }), /*#__PURE__*/React.createElement(&quot;path&quot;, {
+        fill: "white",
+        opacity: "0.1"
+      }), /*#__PURE__*/React.createElement("path", {
         d: `M ${centerX - 32} ${headY - 10} L ${centerX - 32} ${sideY} L ${centerX - 24} ${sideY} Z`
-      }), /*#__PURE__*/React.createElement(&quot;path&quot;, {
+      }), /*#__PURE__*/React.createElement("path", {
         d: `M ${centerX + 32} ${headY - 10} L ${centerX + 32} ${sideY} L ${centerX + 24} ${sideY} Z`
-      })), character.hairStyle === &#x27;Wavy&#x27; &amp;&amp; /*#__PURE__*/React.createElement(&quot;g&quot;, null, /*#__PURE__*/React.createElement(&quot;path&quot;, {
+      })), character.hairStyle === 'Wavy' && /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
         d: `M ${centerX - 32} ${headY - 15} Q ${centerX - 45} ${headY - topOffset - 5} ${centerX - 10} ${headY - topOffset + 5} Q ${centerX + 15} ${headY - topOffset - 15} ${centerX + 35} ${headY - topOffset + 5} Q ${centerX + 42} ${headY - topOffset + 10} ${centerX + 32} ${headY - 15} Z`
-      }), /*#__PURE__*/React.createElement(&quot;path&quot;, {
+      }), /*#__PURE__*/React.createElement("path", {
         d: `M ${centerX - 32} ${headY - 15} L ${centerX - 32} ${sideY} L ${centerX - 25} ${sideY} Z`
-      }), /*#__PURE__*/React.createElement(&quot;path&quot;, {
+      }), /*#__PURE__*/React.createElement("path", {
         d: `M ${centerX + 32} ${headY - 15} L ${centerX + 32} ${sideY} L ${centerX + 25} ${sideY} Z`
-      })), character.hairStyle === &#x27;Curly&#x27; &amp;&amp; /*#__PURE__*/React.createElement(&quot;g&quot;, null, /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+      })), character.hairStyle === 'Curly' && /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("circle", {
         cx: centerX - 24,
         cy: headY - 20,
-        r: &quot;10&quot;
-      }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+        r: "10"
+      }), /*#__PURE__*/React.createElement("circle", {
         cx: centerX - 12,
         cy: headY - 32,
-        r: &quot;11&quot;
-      }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+        r: "11"
+      }), /*#__PURE__*/React.createElement("circle", {
         cx: centerX + 12,
         cy: headY - 32,
-        r: &quot;11&quot;
-      }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+        r: "11"
+      }), /*#__PURE__*/React.createElement("circle", {
         cx: centerX + 24,
         cy: headY - 20,
-        r: &quot;10&quot;
-      }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+        r: "10"
+      }), /*#__PURE__*/React.createElement("circle", {
         cx: centerX,
         cy: headY - 36,
-        r: &quot;12&quot;
+        r: "12"
       })));
     }
-    return /*#__PURE__*/React.createElement(&quot;g&quot;, {
+    return /*#__PURE__*/React.createElement("g", {
       style: hairContainerStyles
-    }, character.hairStyle === &#x27;Straight&#x27; &amp;&amp; /*#__PURE__*/React.createElement(&quot;path&quot;, {
+    }, character.hairStyle === 'Straight' && /*#__PURE__*/React.createElement("path", {
       d: `M ${centerX - 40} ${headY} C ${centerX - 40} ${headY - 50}, ${centerX + 40} ${headY - 50}, ${centerX + 40} ${headY} L ${centerX + 30} ${headY - 15} Q ${centerX} ${headY - 30} ${centerX - 30} ${headY - 15} Z`,
       fill: hairColorHex
-    }), character.hairStyle === &#x27;Wavy&#x27; &amp;&amp; /*#__PURE__*/React.createElement(&quot;path&quot;, {
+    }), character.hairStyle === 'Wavy' && /*#__PURE__*/React.createElement("path", {
       d: `M ${centerX - 40} ${headY} C ${centerX - 40} ${headY - 50}, ${centerX + 40} ${headY - 50}, ${centerX + 40} ${headY} Q ${centerX + 25} ${headY - 25} ${centerX + 10} ${headY - 15} Q ${centerX - 10} ${headY - 25} ${centerX - 40} ${headY} Z`,
       fill: hairColorHex
-    }), character.hairStyle === &#x27;Curly&#x27; &amp;&amp; /*#__PURE__*/React.createElement(&quot;g&quot;, {
+    }), character.hairStyle === 'Curly' && /*#__PURE__*/React.createElement("g", {
       fill: hairColorHex
-    }, /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+    }, /*#__PURE__*/React.createElement("circle", {
       cx: centerX - 25,
       cy: headY - 25,
-      r: &quot;18&quot;
-    }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+      r: "18"
+    }), /*#__PURE__*/React.createElement("circle", {
       cx: centerX,
       cy: headY - 35,
-      r: &quot;20&quot;
-    }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+      r: "20"
+    }), /*#__PURE__*/React.createElement("circle", {
       cx: centerX + 25,
       cy: headY - 25,
-      r: &quot;18&quot;
+      r: "18"
     })));
   };
-  return /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;min-h-screen bg-slate-100 p-3 sm:p-6 font-sans text-slate-800&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;max-w-6xl mx-auto space-y-6&quot;
-  }, /*#__PURE__*/React.createElement(&quot;header&quot;, {
-    className: &quot;bg-white rounded-3xl p-4 sm:p-6 shadow-md border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;span&quot;, {
-    className: &quot;inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-black tracking-wider uppercase mb-1&quot;
-  }, &quot;Classroom English Activity&quot;), /*#__PURE__*/React.createElement(&quot;h1&quot;, {
-    className: &quot;text-xl sm:text-2xl font-black text-slate-900 tracking-tight&quot;
-  }, gameMode === &#x27;challenge&#x27; ? &#x27;🎧 LISTEN AND BUILD THE CHARACTER&#x27; : &#x27;🎨 CHARACTER CREATOR &amp; DESIGN&#x27;), /*#__PURE__*/React.createElement(&quot;p&quot;, {
-    className: &quot;text-xs text-slate-500 font-medium&quot;
-  }, &quot;Giri\u015F yapman\u0131z gerekmez. Gizli sekme ve t\xFCm taray\u0131c\u0131larda 100% \xFCcretsiz \xE7al\u0131\u015F\u0131r.&quot;)), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-2xl w-full md:w-auto justify-center&quot;
-  }, /*#__PURE__*/React.createElement(&quot;button&quot;, {
-    onClick: () =&gt; {
-      playSoundEffect(&#x27;click&#x27;);
-      setGameMode(&#x27;challenge&#x27;);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "min-h-screen bg-slate-100 p-3 sm:p-6 font-sans text-slate-800"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-w-6xl mx-auto space-y-6"
+  }, /*#__PURE__*/React.createElement("header", {
+    className: "bg-white rounded-3xl p-4 sm:p-6 shadow-md border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    className: "inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-black tracking-wider uppercase mb-1"
+  }, "Classroom English Activity"), /*#__PURE__*/React.createElement("h1", {
+    className: "text-xl sm:text-2xl font-black text-slate-900 tracking-tight"
+  }, gameMode === 'challenge' ? '🎧 LISTEN AND BUILD THE CHARACTER' : '🎨 CHARACTER CREATOR & DESIGN')), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-2xl w-full md:w-auto justify-center"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      playSoundEffect('click');
+      setGameMode('challenge');
     },
-    className: `px-4 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${gameMode === &#x27;challenge&#x27; ? &#x27;bg-indigo-600 text-white shadow-md&#x27; : &#x27;text-slate-600 hover:text-slate-900&#x27;}`
-  }, /*#__PURE__*/React.createElement(&quot;span&quot;, {
-    className: &quot;text-base&quot;
-  }, &quot;\uD83C\uDFA7&quot;), &quot; Listen &amp; Build Game&quot;), /*#__PURE__*/React.createElement(&quot;button&quot;, {
-    onClick: () =&gt; {
-      playSoundEffect(&#x27;click&#x27;);
-      setGameMode(&#x27;free&#x27;);
+    className: `px-4 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${gameMode === 'challenge' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'}`
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-base"
+  }, "\uD83C\uDFA7"), " Listen & Build Game"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      playSoundEffect('click');
+      setGameMode('free');
     },
-    className: `px-4 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${gameMode === &#x27;free&#x27; ? &#x27;bg-indigo-600 text-white shadow-md&#x27; : &#x27;text-slate-600 hover:text-slate-900&#x27;}`
-  }, /*#__PURE__*/React.createElement(&quot;span&quot;, {
-    className: &quot;text-base&quot;
-  }, &quot;\uD83C\uDFA8&quot;), &quot; Free Design&quot;))), gameMode === &#x27;challenge&#x27; &amp;&amp; /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-indigo-400&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex flex-col md:flex-row items-center justify-between gap-4&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex items-center gap-4 w-full md:w-auto&quot;
-  }, /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    className: `px-4 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${gameMode === 'free' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'}`
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-base"
+  }, "\uD83C\uDFA8"), " Free Design"))), gameMode === 'challenge' && /*#__PURE__*/React.createElement("div", {
+    className: "bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-indigo-400"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col md:flex-row items-center justify-between gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4 w-full md:w-auto"
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: handlePlayAudio,
     disabled: isPlayingAudio,
-    className: `px-6 py-4 rounded-2xl font-black text-sm flex items-center gap-3 transition-all shadow-xl active:scale-95 ${isPlayingAudio ? &#x27;bg-amber-400 text-slate-900 animate-pulse&#x27; : &#x27;bg-white text-indigo-700 hover:bg-slate-50&#x27;}`
-  }, /*#__PURE__*/React.createElement(&quot;span&quot;, {
-    className: &quot;text-2xl&quot;
-  }, isPlayingAudio ? &#x27;🔊&#x27; : &#x27;▶️&#x27;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;text-left&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;leading-none&quot;
-  }, isPlayingAudio ? &#x27;Speaking...&#x27; : &#x27;Listen Audio&#x27;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;text-[10px] opacity-75 font-normal mt-0.5&quot;
-  }, &quot;Click to hear English speech&quot;))), /*#__PURE__*/React.createElement(&quot;button&quot;, {
-    onClick: () =&gt; setShowHintText(!showHintText),
-    className: &quot;px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs border border-white/20 transition-all&quot;
-  }, showHintText ? &#x27;👁️ Hide Text&#x27; : &#x27;👁️ Show Text Hint&#x27;)), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex items-center gap-4 bg-white/10 px-5 py-3 rounded-2xl border border-white/20 text-center sm:text-right&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;text-[10px] font-bold opacity-80 uppercase tracking-widest&quot;
-  }, &quot;SCORE&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;text-xl font-black text-amber-300&quot;
-  }, score, &quot; pts&quot;)), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;h-8 w-px bg-white/20&quot;
-  }), /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;text-[10px] font-bold opacity-80 uppercase tracking-widest&quot;
-  }, &quot;STREAK&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;text-xl font-black text-emerald-300&quot;
-  }, &quot;\uD83D\uDD25 &quot;, streak)))), showHintText &amp;&amp; /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;mt-4 p-4 bg-white/10 rounded-2xl border border-white/20 text-sm font-medium leading-relaxed italic&quot;
-  }, &quot;\&quot;&quot;, speechPrompt, &quot;\&quot;&quot;)), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex flex-col md:flex-row gap-6&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;w-full md:w-5/12 lg:w-1/3 flex-shrink-0&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;bg-white rounded-3xl shadow-xl overflow-hidden sticky top-6 border-4 border-white&quot;
-  }, gameMode === &#x27;free&#x27; &amp;&amp; /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex p-1 bg-slate-200/60 rounded-xl&quot;
-  }, characters.map((_, i) =&gt; /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    className: `px-6 py-4 rounded-2xl font-black text-sm flex items-center gap-3 transition-all shadow-xl active:scale-95 ${isPlayingAudio ? 'bg-amber-400 text-slate-900 animate-pulse' : 'bg-white text-indigo-700 hover:bg-slate-50'}`
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-2xl"
+  }, isPlayingAudio ? '🔊' : '▶️'), /*#__PURE__*/React.createElement("div", {
+    className: "text-left"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "leading-none"
+  }, isPlayingAudio ? 'Speaking...' : 'Listen Audio'), /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] opacity-75 font-normal mt-0.5"
+  }, "Click to hear English speech"))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowHintText(!showHintText),
+    className: "px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs border border-white/20 transition-all"
+  }, showHintText ? '👁️ Hide Text' : '👁️ Show Text Hint')), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4 bg-white/10 px-5 py-3 rounded-2xl border border-white/20 text-center sm:text-right"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] font-bold opacity-80 uppercase tracking-widest"
+  }, "SCORE"), /*#__PURE__*/React.createElement("div", {
+    className: "text-xl font-black text-amber-300"
+  }, score, " pts")), /*#__PURE__*/React.createElement("div", {
+    className: "h-8 w-px bg-white/20"
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] font-bold opacity-80 uppercase tracking-widest"
+  }, "STREAK"), /*#__PURE__*/React.createElement("div", {
+    className: "text-xl font-black text-emerald-300"
+  }, "\uD83D\uDD25 ", streak)))), showHintText && /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 p-4 bg-white/10 rounded-2xl border border-white/20 text-sm font-medium leading-relaxed italic"
+  }, "\"", speechPrompt, "\"")), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col md:flex-row gap-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-full md:w-5/12 lg:w-1/3 flex-shrink-0"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bg-white rounded-3xl shadow-xl overflow-hidden sticky top-6 border-4 border-white"
+  }, gameMode === 'free' && /*#__PURE__*/React.createElement("div", {
+    className: "p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex p-1 bg-slate-200/60 rounded-xl"
+  }, characters.map((_, i) => /*#__PURE__*/React.createElement("button", {
     key: i,
-    onClick: () =&gt; {
-      playSoundEffect(&#x27;click&#x27;);
+    onClick: () => {
+      playSoundEffect('click');
       setActiveSlot(i);
     },
-    className: `w-8 h-8 rounded-lg font-black text-xs transition-all ${activeSlot === i ? &#x27;bg-indigo-600 text-white shadow-sm&#x27; : &#x27;text-slate-500 hover:text-slate-800&#x27;}`
-  }, &quot;#&quot;, i + 1))), /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    className: `w-8 h-8 rounded-lg font-black text-xs transition-all ${activeSlot === i ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`
+  }, "#", i + 1))), /*#__PURE__*/React.createElement("button", {
     onClick: randomizeCurrentSlot,
-    className: &quot;px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all&quot;
-  }, &quot;\uD83C\uDFB2 Random&quot;)), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;w-full aspect-[3/4] flex flex-col items-center justify-center bg-slate-200/60 p-4&quot;
-  }, /*#__PURE__*/React.createElement(&quot;svg&quot;, {
-    viewBox: &quot;0 0 300 450&quot;,
-    className: &quot;w-full h-full drop-shadow-md&quot;
-  }, /*#__PURE__*/React.createElement(BackHair, null), isDress ? /*#__PURE__*/React.createElement(&quot;g&quot;, null, /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+    className: "px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all"
+  }, "\uD83C\uDFB2 Random")), /*#__PURE__*/React.createElement("div", {
+    className: "w-full aspect-[3/4] flex flex-col items-center justify-center bg-slate-200/60 p-4"
+  }, /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 300 450",
+    className: "w-full h-full drop-shadow-md"
+  }, /*#__PURE__*/React.createElement(BackHair, null), isDress ? /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("rect", {
     x: centerX - torsoWidth / 4 - legWidth / 2,
     y: pantsY,
     width: legWidth,
     height: legHeight,
-    rx: &quot;4&quot;,
+    rx: "4",
     fill: COLORS.skin
-  }), /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+  }), /*#__PURE__*/React.createElement("rect", {
     x: centerX + torsoWidth / 4 - legWidth / 2,
     y: pantsY,
     width: legWidth,
     height: legHeight,
-    rx: &quot;4&quot;,
+    rx: "4",
     fill: COLORS.skin
-  }), /*#__PURE__*/React.createElement(&quot;path&quot;, {
+  }), /*#__PURE__*/React.createElement("path", {
     d: `M ${centerX - torsoWidth / 2} ${pantsY} L ${centerX + torsoWidth / 2} ${pantsY} L ${centerX + torsoWidth / 1.2} ${pantsY + legHeight / 1.5} L ${centerX - torsoWidth / 1.2} ${pantsY + legHeight / 1.5} Z`,
     fill: COLORS.clothing.Dress
-  })) : character.lowerWear === &#x27;Skirt&#x27; &amp;&amp; !isMale ? /*#__PURE__*/React.createElement(&quot;g&quot;, null, /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+  })) : character.lowerWear === 'Skirt' && !isMale ? /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("rect", {
     x: centerX - torsoWidth / 4 - legWidth / 2,
     y: pantsY,
     width: legWidth,
     height: legHeight,
-    rx: &quot;4&quot;,
+    rx: "4",
     fill: COLORS.skin
-  }), /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+  }), /*#__PURE__*/React.createElement("rect", {
     x: centerX + torsoWidth / 4 - legWidth / 2,
     y: pantsY,
     width: legWidth,
     height: legHeight,
-    rx: &quot;4&quot;,
+    rx: "4",
     fill: COLORS.skin
-  }), /*#__PURE__*/React.createElement(&quot;path&quot;, {
+  }), /*#__PURE__*/React.createElement("path", {
     d: `M ${centerX - torsoWidth / 2} ${pantsY} L ${centerX + torsoWidth / 2} ${pantsY} L ${centerX + torsoWidth / 1.5} ${pantsY + legHeight / 1.5} L ${centerX - torsoWidth / 1.5} ${pantsY + legHeight / 1.5} Z`,
     fill: COLORS.clothing.Skirt
-  })) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+  })) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("rect", {
     x: centerX - torsoWidth / 4 - legWidth / 2,
     y: pantsY,
     width: legWidth,
     height: legHeight,
-    rx: &quot;4&quot;,
-    fill: COLORS.clothing[character.lowerWear] || &#x27;#334155&#x27;
-  }), /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+    rx: "4",
+    fill: COLORS.clothing[character.lowerWear] || '#334155'
+  }), /*#__PURE__*/React.createElement("rect", {
     x: centerX + torsoWidth / 4 - legWidth / 2,
     y: pantsY,
     width: legWidth,
     height: legHeight,
-    rx: &quot;4&quot;,
-    fill: COLORS.clothing[character.lowerWear] || &#x27;#334155&#x27;
-  })), /*#__PURE__*/React.createElement(&quot;g&quot;, null, [&#x27;left&#x27;, &#x27;right&#x27;].map(side =&gt; {
-    const xPos = side === &#x27;left&#x27; ? centerX - torsoWidth / 4 - legWidth / 2 - 4 : centerX + torsoWidth / 4 - legWidth / 2 - 4;
+    rx: "4",
+    fill: COLORS.clothing[character.lowerWear] || '#334155'
+  })), /*#__PURE__*/React.createElement("g", null, ['left', 'right'].map(side => {
+    const xPos = side === 'left' ? centerX - torsoWidth / 4 - legWidth / 2 - 4 : centerX + torsoWidth / 4 - legWidth / 2 - 4;
     const yBase = pantsY + legHeight - 12;
-    const shoeColor = COLORS.shoes[character.shoes] || &#x27;#171717&#x27;;
+    const shoeColor = COLORS.shoes[character.shoes] || '#171717';
     const sWidth = legWidth + 8;
-    return /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+    return /*#__PURE__*/React.createElement("rect", {
       key: side,
       x: xPos,
       y: yBase,
       width: sWidth,
-      height: &quot;14&quot;,
-      rx: &quot;6&quot;,
+      height: "14",
+      rx: "6",
       fill: shoeColor
     });
-  })), /*#__PURE__*/React.createElement(&quot;g&quot;, null, /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+  })), /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("rect", {
     x: centerX - torsoWidth / 2 - armWidth + 2,
     y: torsoY + 15,
     width: armWidth,
     height: armHeight,
     rx: armWidth / 2,
     fill: COLORS.skin
-  }), /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+  }), /*#__PURE__*/React.createElement("rect", {
     x: centerX + torsoWidth / 2 - 2,
     y: torsoY + 15,
     width: armWidth,
@@ -2465,1050 +958,263 @@ function CharacterApp() {
     rx: armWidth / 2,
     fill: COLORS.skin
   })), /*#__PURE__*/React.createElement(Fingers, {
-    side: &quot;left&quot;
+    side: "left"
   }), /*#__PURE__*/React.createElement(Fingers, {
-    side: &quot;right&quot;
-  }), /*#__PURE__*/React.createElement(&quot;g&quot;, null, /*#__PURE__*/React.createElement(&quot;path&quot;, {
+    side: "right"
+  }), /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
     d: `M ${centerX - torsoWidth / 2} ${torsoY + 20} Q ${centerX - torsoWidth / 2} ${torsoY} ${centerX} ${torsoY} Q ${centerX + torsoWidth / 2} ${torsoY} ${centerX + torsoWidth / 2} ${torsoY + 20} V ${torsoY + upperWearHeight} H ${centerX - torsoWidth / 2} Z`,
-    fill: isDress ? COLORS.clothing.Dress : COLORS.clothing[character.upperWear] || &#x27;#3b82f6&#x27;
-  })), /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+    fill: isDress ? COLORS.clothing.Dress : COLORS.clothing[character.upperWear] || '#3b82f6'
+  })), /*#__PURE__*/React.createElement("rect", {
     x: centerX - 8,
     y: neckY,
-    width: &quot;16&quot;,
-    height: &quot;30&quot;,
+    width: "16",
+    height: "30",
     fill: COLORS.skin
-  }), /*#__PURE__*/React.createElement(&quot;g&quot;, {
+  }), /*#__PURE__*/React.createElement("g", {
     fill: COLORS.skin
-  }, /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+  }, /*#__PURE__*/React.createElement("circle", {
     cx: centerX - 30,
     cy: headY + 5,
-    r: &quot;7&quot;
-  }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+    r: "7"
+  }), /*#__PURE__*/React.createElement("circle", {
     cx: centerX + 30,
     cy: headY + 5,
-    r: &quot;7&quot;
-  }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+    r: "7"
+  }), /*#__PURE__*/React.createElement("circle", {
     cx: centerX,
     cy: headY,
-    r: &quot;35&quot;
-  })), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+    r: "35"
+  })), /*#__PURE__*/React.createElement("circle", {
     cx: centerX - 13,
     cy: headY - 4,
-    r: &quot;6&quot;,
-    fill: &quot;white&quot;
-  }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+    r: "6",
+    fill: "white"
+  }), /*#__PURE__*/React.createElement("circle", {
     cx: centerX - 13,
     cy: headY - 4,
-    r: &quot;3.5&quot;,
+    r: "3.5",
     fill: eyeColorHex
-  }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+  }), /*#__PURE__*/React.createElement("circle", {
     cx: centerX + 13,
     cy: headY - 4,
-    r: &quot;6&quot;,
-    fill: &quot;white&quot;
-  }), /*#__PURE__*/React.createElement(&quot;circle&quot;, {
+    r: "6",
+    fill: "white"
+  }), /*#__PURE__*/React.createElement("circle", {
     cx: centerX + 13,
     cy: headY - 4,
-    r: &quot;3.5&quot;,
+    r: "3.5",
     fill: eyeColorHex
-  }), (hasGlasses || hasSunglasses) &amp;&amp; /*#__PURE__*/React.createElement(&quot;g&quot;, {
-    stroke: hasSunglasses ? &quot;none&quot; : COLORS.clothing.Glasses,
-    strokeWidth: &quot;2&quot;,
-    fill: hasSunglasses ? COLORS.clothing.Sunglasses : &quot;none&quot;
-  }, /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+  }), (hasGlasses || hasSunglasses) && /*#__PURE__*/React.createElement("g", {
+    stroke: hasSunglasses ? "none" : COLORS.clothing.Glasses,
+    strokeWidth: "2",
+    fill: hasSunglasses ? COLORS.clothing.Sunglasses : "none"
+  }, /*#__PURE__*/React.createElement("rect", {
     x: centerX - 23,
     y: headY - 10,
-    width: &quot;16&quot;,
-    height: &quot;11&quot;,
-    rx: &quot;2&quot;
-  }), /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+    width: "16",
+    height: "11",
+    rx: "2"
+  }), /*#__PURE__*/React.createElement("rect", {
     x: centerX + 7,
     y: headY - 10,
-    width: &quot;16&quot;,
-    height: &quot;11&quot;,
-    rx: &quot;2&quot;
-  })), /*#__PURE__*/React.createElement(&quot;path&quot;, {
+    width: "16",
+    height: "11",
+    rx: "2"
+  })), /*#__PURE__*/React.createElement("path", {
     d: `M ${centerX - 10} ${headY + 20} Q ${centerX} ${headY + 26} ${centerX + 10} ${headY + 20}`,
-    fill: &quot;none&quot;,
-    stroke: &quot;#be123c&quot;,
-    strokeWidth: &quot;2&quot;,
-    strokeLinecap: &quot;round&quot;
-  }), /*#__PURE__*/React.createElement(FrontHair, null), hasHat &amp;&amp; /*#__PURE__*/React.createElement(&quot;g&quot;, {
+    fill: "none",
+    stroke: "#be123c",
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement(FrontHair, null), hasHat && /*#__PURE__*/React.createElement("g", {
     fill: COLORS.clothing.Hat
-  }, /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+  }, /*#__PURE__*/React.createElement("rect", {
     x: centerX - 50,
     y: headY - 15,
-    width: &quot;100&quot;,
-    height: &quot;8&quot;,
-    rx: &quot;4&quot;
-  }), /*#__PURE__*/React.createElement(&quot;path&quot;, {
+    width: "100",
+    height: "8",
+    rx: "4"
+  }), /*#__PURE__*/React.createElement("path", {
     d: `M ${centerX - 30} ${headY - 15} A 30 30 0 0 1 ${centerX + 30} ${headY - 15} Z`
-  })), hasPoliceHat &amp;&amp; /*#__PURE__*/React.createElement(&quot;g&quot;, {
-    fill: COLORS.clothing[&#x27;Police Hat&#x27;]
-  }, /*#__PURE__*/React.createElement(&quot;path&quot;, {
+  })), hasPoliceHat && /*#__PURE__*/React.createElement("g", {
+    fill: COLORS.clothing['Police Hat']
+  }, /*#__PURE__*/React.createElement("path", {
     d: `M ${centerX - 42} ${headY - 35} A 42 25 0 0 1 ${centerX + 42} ${headY - 35} V ${headY - 15} H ${centerX - 42} Z`
-  }), /*#__PURE__*/React.createElement(&quot;rect&quot;, {
+  }), /*#__PURE__*/React.createElement("rect", {
     x: centerX - 46,
     y: headY - 15,
-    width: &quot;92&quot;,
-    height: &quot;6&quot;,
-    rx: &quot;2&quot;,
-    fill: &quot;#1e2937&quot;
-  }))), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;mt-3 flex gap-3 w-full justify-center&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center&quot;
-  }, /*#__PURE__*/React.createElement(&quot;span&quot;, {
-    className: &quot;text-[9px] font-bold text-slate-400 uppercase&quot;
-  }, &quot;HEIGHT&quot;), /*#__PURE__*/React.createElement(&quot;span&quot;, {
-    className: &quot;text-sm font-black text-indigo-700&quot;
-  }, METRICS.height[character.height])), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center&quot;
-  }, /*#__PURE__*/React.createElement(&quot;span&quot;, {
-    className: &quot;text-[9px] font-bold text-slate-400 uppercase&quot;
-  }, &quot;WEIGHT&quot;), /*#__PURE__*/React.createElement(&quot;span&quot;, {
-    className: &quot;text-sm font-black text-indigo-700&quot;
-  }, METRICS.weight[character.bodyType])))), gameMode === &#x27;challenge&#x27; &amp;&amp; /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;p-4 bg-slate-50 border-t border-slate-200 flex flex-col gap-2&quot;
-  }, /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    width: "92",
+    height: "6",
+    rx: "2",
+    fill: "#1e2937"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 flex gap-3 w-full justify-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[9px] font-bold text-slate-400 uppercase"
+  }, "HEIGHT"), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-black text-indigo-700"
+  }, METRICS.height[character.height])), /*#__PURE__*/React.createElement("div", {
+    className: "bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[9px] font-bold text-slate-400 uppercase"
+  }, "WEIGHT"), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-black text-indigo-700"
+  }, METRICS.weight[character.bodyType])))), gameMode === 'challenge' && /*#__PURE__*/React.createElement("div", {
+    className: "p-4 bg-slate-50 border-t border-slate-200 flex flex-col gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: checkAnswer,
-    className: &quot;w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2&quot;
-  }, /*#__PURE__*/React.createElement(&quot;span&quot;, null, &quot;\u2713&quot;), &quot; Check Answer!&quot;), /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    className: "w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", null, "\u2713"), " Check Answer!"), /*#__PURE__*/React.createElement("button", {
     onClick: startNewChallenge,
-    className: &quot;w-full py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition-all&quot;
-  }, &quot;\u23ED\uFE0F Skip / Next Character&quot;)))), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;w-full md:w-7/12 lg:w-2/3&quot;
-  }, feedback &amp;&amp; /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: `mb-6 p-5 rounded-3xl border-2 shadow-lg ${feedback.isSuccess ? &#x27;bg-emerald-50 border-emerald-300 text-emerald-900&#x27; : &#x27;bg-amber-50 border-amber-300 text-amber-900&#x27;}`
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex items-center justify-between mb-3&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex items-center gap-3&quot;
-  }, /*#__PURE__*/React.createElement(&quot;span&quot;, {
-    className: &quot;text-3xl&quot;
-  }, feedback.isSuccess ? &#x27;🎉&#x27; : &#x27;💡&#x27;), /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;h3&quot;, {
-    className: &quot;font-black text-lg&quot;
-  }, feedback.isSuccess ? &#x27;PERFECT MATCH! (TEBRİKLER!)&#x27; : &#x27;ALMOST THERE! (TEKRAR DİNLE)&#x27;), /*#__PURE__*/React.createElement(&quot;p&quot;, {
-    className: &quot;text-xs font-medium opacity-80&quot;
-  }, feedback.correctCount, &quot; of &quot;, feedback.totalCount, &quot; traits correct&quot;))), feedback.isSuccess &amp;&amp; /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    className: "w-full py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition-all"
+  }, "\u23ED\uFE0F Skip / Next Character")))), /*#__PURE__*/React.createElement("div", {
+    className: "w-full md:w-7/12 lg:w-2/3"
+  }, feedback && /*#__PURE__*/React.createElement("div", {
+    className: `mb-6 p-5 rounded-3xl border-2 shadow-lg ${feedback.isSuccess ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-amber-50 border-amber-300 text-amber-900'}`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-3xl"
+  }, feedback.isSuccess ? '🎉' : '💡'), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    className: "font-black text-lg"
+  }, feedback.isSuccess ? 'PERFECT MATCH!' : 'ALMOST THERE! LISTEN AGAIN'), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs font-medium opacity-80"
+  }, feedback.correctCount, " of ", feedback.totalCount, " traits correct"))), feedback.isSuccess && /*#__PURE__*/React.createElement("button", {
     onClick: startNewChallenge,
-    className: &quot;px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md&quot;
-  }, &quot;Next Character \u2794&quot;)), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2&quot;
-  }, feedback.checks.map((check, idx) =&gt; /*#__PURE__*/React.createElement(&quot;div&quot;, {
+    className: "px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md"
+  }, "Next Character \u2794")), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2"
+  }, feedback.checks.map((check, idx) => /*#__PURE__*/React.createElement("div", {
     key: idx,
-    className: `p-2 rounded-xl text-xs font-bold border ${check.match ? &#x27;bg-emerald-100/80 border-emerald-300 text-emerald-800&#x27; : &#x27;bg-rose-100/80 border-rose-300 text-rose-800&#x27;}`
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, null, check.match ? &#x27;✓&#x27; : &#x27;✗&#x27;, &quot; &quot;, check.name), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;text-[10px] font-normal opacity-80&quot;
-  }, &quot;Target: &quot;, check.expected))))), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;bg-white rounded-3xl shadow-md p-5 sm:p-6 border border-slate-200&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;grid grid-cols-1 lg:grid-cols-2 gap-6&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;space-y-5&quot;
-  }, /*#__PURE__*/React.createElement(&quot;section&quot;, null, /*#__PURE__*/React.createElement(&quot;h3&quot;, {
-    className: &quot;text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider&quot;
-  }, &quot;Identity &amp; Structure&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;space-y-3&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;label&quot;, {
-    className: &quot;text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase&quot;
-  }, &quot;GENDER&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex gap-1.5&quot;
-  }, OPTIONS.gender.map(g =&gt; /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    className: `p-2 rounded-xl text-xs font-bold border ${check.match ? 'bg-emerald-100/80 border-emerald-300 text-emerald-800' : 'bg-rose-100/80 border-rose-300 text-rose-800'}`
+  }, /*#__PURE__*/React.createElement("div", null, check.match ? '✓' : '✗', " ", check.name), /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] font-normal opacity-80"
+  }, "Target: ", check.expected))))), /*#__PURE__*/React.createElement("div", {
+    className: "bg-white rounded-3xl shadow-md p-5 sm:p-6 border border-slate-200"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 lg:grid-cols-2 gap-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "space-y-5"
+  }, /*#__PURE__*/React.createElement("section", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider"
+  }, "Identity & Structure"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase"
+  }, "GENDER"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-1.5"
+  }, OPTIONS.gender.map(g => /*#__PURE__*/React.createElement("button", {
     key: g,
-    onClick: () =&gt; updateTrait(&#x27;gender&#x27;, g),
-    className: `flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${character.gender === g ? &#x27;bg-indigo-600 border-indigo-700 text-white shadow-sm&#x27; : &#x27;bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100&#x27;}`
-  }, TRANSLATIONS[g])))), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;grid grid-cols-2 gap-3&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;label&quot;, {
-    className: &quot;text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase&quot;
-  }, &quot;HEIGHT&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex flex-col gap-1&quot;
-  }, OPTIONS.height.map(h =&gt; /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    onClick: () => updateTrait('gender', g),
+    className: `flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${character.gender === g ? 'bg-indigo-600 border-indigo-700 text-white shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`
+  }, TRANSLATIONS[g])))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase"
+  }, "HEIGHT"), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-1"
+  }, OPTIONS.height.map(h => /*#__PURE__*/React.createElement("button", {
     key: h,
-    onClick: () =&gt; updateTrait(&#x27;height&#x27;, h),
-    className: `py-1.5 rounded-lg text-xs font-bold border transition-all ${character.height === h ? &#x27;bg-indigo-600 border-indigo-700 text-white&#x27; : &#x27;bg-slate-50 border-slate-200 text-slate-600&#x27;}`
-  }, TRANSLATIONS[h])))), /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;label&quot;, {
-    className: &quot;text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase&quot;
-  }, &quot;BODY TYPE&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex flex-col gap-1&quot;
-  }, OPTIONS.bodyType.map(b =&gt; /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    onClick: () => updateTrait('height', h),
+    className: `py-1.5 rounded-lg text-xs font-bold border transition-all ${character.height === h ? 'bg-indigo-600 border-indigo-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-600'}`
+  }, TRANSLATIONS[h])))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase"
+  }, "BODY TYPE"), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-1"
+  }, OPTIONS.bodyType.map(b => /*#__PURE__*/React.createElement("button", {
     key: b,
-    onClick: () =&gt; updateTrait(&#x27;bodyType&#x27;, b),
-    className: `py-1.5 rounded-lg text-xs font-bold border transition-all ${character.bodyType === b ? &#x27;bg-indigo-600 border-indigo-700 text-white&#x27; : &#x27;bg-slate-50 border-slate-200 text-slate-600&#x27;}`
-  }, TRANSLATIONS[b]))))))), /*#__PURE__*/React.createElement(&quot;section&quot;, null, /*#__PURE__*/React.createElement(&quot;h3&quot;, {
-    className: &quot;text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider&quot;
-  }, &quot;Hair &amp; Colors&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;space-y-3&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;label&quot;, {
-    className: &quot;text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase&quot;
-  }, &quot;HAIRSTYLE&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;grid grid-cols-2 gap-1.5&quot;
-  }, OPTIONS.hairStyle.map(s =&gt; {
-    if (s === &#x27;None&#x27; &amp;&amp; character.gender === &#x27;Female&#x27;) return null;
-    return /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    onClick: () => updateTrait('bodyType', b),
+    className: `py-1.5 rounded-lg text-xs font-bold border transition-all ${character.bodyType === b ? 'bg-indigo-600 border-indigo-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-600'}`
+  }, TRANSLATIONS[b]))))))), /*#__PURE__*/React.createElement("section", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider"
+  }, "Hair & Colors"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase"
+  }, "HAIRSTYLE"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-1.5"
+  }, OPTIONS.hairStyle.map(s => {
+    if (s === 'None' && character.gender === 'Female') return null;
+    return /*#__PURE__*/React.createElement("button", {
       key: s,
-      onClick: () =&gt; updateTrait(&#x27;hairStyle&#x27;, s),
-      className: `py-1.5 rounded-lg text-xs font-bold border transition-all ${character.hairStyle === s ? &#x27;bg-indigo-600 border-indigo-700 text-white&#x27; : &#x27;bg-slate-50 border-slate-200 text-slate-600&#x27;}`
+      onClick: () => updateTrait('hairStyle', s),
+      className: `py-1.5 rounded-lg text-xs font-bold border transition-all ${character.hairStyle === s ? 'bg-indigo-600 border-indigo-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-600'}`
     }, TRANSLATIONS[s]);
-  }))), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;grid grid-cols-2 gap-3&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;label&quot;, {
-    className: &quot;text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase&quot;
-  }, &quot;HAIR COLOR&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex gap-1.5 flex-wrap&quot;
-  }, OPTIONS.hairColor.map(c =&gt; /*#__PURE__*/React.createElement(&quot;button&quot;, {
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase"
+  }, "HAIR COLOR"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-1.5 flex-wrap"
+  }, OPTIONS.hairColor.map(c => /*#__PURE__*/React.createElement("button", {
     key: c,
-    onClick: () =&gt; updateTrait(&#x27;hairColor&#x27;, c),
-    className: `w-7 h-7 rounded-full border-2 transition-all ${character.hairColor === c ? &#x27;border-indigo-600 scale-110 shadow-md&#x27; : &#x27;border-white shadow-sm&#x27;}`,
+    onClick: () => updateTrait('hairColor', c),
+    className: `w-7 h-7 rounded-full border-2 transition-all ${character.hairColor === c ? 'border-indigo-600 scale-110 shadow-md' : 'border-white shadow-sm'}`,
     style: {
       backgroundColor: COLORS.hair[c]
     }
-  })))), /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;label&quot;, {
-    className: &quot;text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase&quot;
-  }, &quot;EYE COLOR&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;flex gap-1.5 flex-wrap&quot;
-  }, OPTIONS.eyeColor.map(c =&gt; /*#__PURE__*/React.createElement(&quot;button&quot;, {
+  })))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase"
+  }, "EYE COLOR"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-1.5 flex-wrap"
+  }, OPTIONS.eyeColor.map(c => /*#__PURE__*/React.createElement("button", {
     key: c,
-    onClick: () =&gt; updateTrait(&#x27;eyeColor&#x27;, c),
-    className: `w-7 h-7 rounded-full border-2 transition-all ${character.eyeColor === c ? &#x27;border-indigo-600 scale-110 shadow-md&#x27; : &#x27;border-white shadow-sm&#x27;}`,
+    onClick: () => updateTrait('eyeColor', c),
+    className: `w-7 h-7 rounded-full border-2 transition-all ${character.eyeColor === c ? 'border-indigo-600 scale-110 shadow-md' : 'border-white shadow-sm'}`,
     style: {
       backgroundColor: COLORS.eye[c]
     }
-  })))))))), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;space-y-5&quot;
-  }, /*#__PURE__*/React.createElement(&quot;section&quot;, null, /*#__PURE__*/React.createElement(&quot;h3&quot;, {
-    className: &quot;text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider&quot;
-  }, &quot;Clothing&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;space-y-3&quot;
-  }, /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;label&quot;, {
-    className: &quot;text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase&quot;
-  }, &quot;TOPS&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1&quot;
-  }, OPTIONS.upperWear.map(u =&gt; {
-    if (u === &#x27;Dress&#x27; &amp;&amp; character.gender === &#x27;Male&#x27;) return null;
-    return /*#__PURE__*/React.createElement(&quot;button&quot;, {
+  })))))))), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-5"
+  }, /*#__PURE__*/React.createElement("section", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider"
+  }, "Clothing"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase"
+  }, "TOPS"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1"
+  }, OPTIONS.upperWear.map(u => {
+    if (u === 'Dress' && character.gender === 'Male') return null;
+    return /*#__PURE__*/React.createElement("button", {
       key: u,
-      onClick: () =&gt; updateTrait(&#x27;upperWear&#x27;, u),
-      className: `py-1.5 rounded-lg text-xs font-bold border transition-all ${character.upperWear === u ? &#x27;bg-indigo-600 border-indigo-700 text-white&#x27; : &#x27;bg-slate-50 border-slate-200 text-slate-600&#x27;}`
+      onClick: () => updateTrait('upperWear', u),
+      className: `py-1.5 rounded-lg text-xs font-bold border transition-all ${character.upperWear === u ? 'bg-indigo-600 border-indigo-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-600'}`
     }, TRANSLATIONS[u]);
-  }))), /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;label&quot;, {
-    className: &quot;text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase&quot;
-  }, &quot;BOTTOMS&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;grid grid-cols-2 gap-1.5&quot;
-  }, OPTIONS.lowerWear.map(l =&gt; {
-    if (l === &#x27;Skirt&#x27; &amp;&amp; character.gender === &#x27;Male&#x27;) return null;
-    return /*#__PURE__*/React.createElement(&quot;button&quot;, {
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[10px] font-bold text-slate-400 block mb-1 tracking-widest uppercase"
+  }, "BOTTOMS"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-1.5"
+  }, OPTIONS.lowerWear.map(l => {
+    if (l === 'Skirt' && character.gender === 'Male') return null;
+    return /*#__PURE__*/React.createElement("button", {
       key: l,
-      onClick: () =&gt; updateTrait(&#x27;lowerWear&#x27;, l),
-      className: `py-1.5 rounded-lg text-xs font-bold border ${character.lowerWear === l ? &#x27;bg-indigo-600 border-indigo-700 text-white&#x27; : &#x27;bg-slate-50 border-slate-200 text-slate-600&#x27;}`
+      onClick: () => updateTrait('lowerWear', l),
+      className: `py-1.5 rounded-lg text-xs font-bold border ${character.lowerWear === l ? 'bg-indigo-600 border-indigo-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-600'}`
     }, TRANSLATIONS[l]);
-  }))))), /*#__PURE__*/React.createElement(&quot;section&quot;, null, /*#__PURE__*/React.createElement(&quot;h3&quot;, {
-    className: &quot;text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider&quot;
-  }, &quot;Accessories &amp; Hats&quot;), /*#__PURE__*/React.createElement(&quot;div&quot;, null, /*#__PURE__*/React.createElement(&quot;div&quot;, {
-    className: &quot;grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1&quot;
-  }, OPTIONS.accessories.map(acc =&gt; {
-    if (acc === &#x27;Earrings&#x27; &amp;&amp; character.gender !== &#x27;Female&#x27;) return null;
+  }))))), /*#__PURE__*/React.createElement("section", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-xs font-black text-indigo-600 uppercase mb-3 border-b pb-1 tracking-wider"
+  }, "Accessories & Hats"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1"
+  }, OPTIONS.accessories.map(acc => {
+    if (acc === 'Earrings' && character.gender !== 'Female') return null;
     const selected = hasAccessory(acc);
-    return /*#__PURE__*/React.createElement(&quot;button&quot;, {
+    return /*#__PURE__*/React.createElement("button", {
       key: acc,
-      onClick: () =&gt; toggleAccessory(acc),
-      className: `py-1.5 rounded-lg text-xs font-bold border transition-all ${selected ? &#x27;bg-amber-500 border-amber-600 text-white shadow-sm&#x27; : &#x27;bg-slate-50 border-slate-200 text-slate-600&#x27;}`
-    }, selected ? &#x27;✓ &#x27; : &#x27;&#x27;, TRANSLATIONS[acc]);
+      onClick: () => toggleAccessory(acc),
+      className: `py-1.5 rounded-lg text-xs font-bold border transition-all ${selected ? 'bg-amber-500 border-amber-600 text-white shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600'}`
+    }, selected ? '✓ ' : '', TRANSLATIONS[acc]);
   })))))))))));
 }
 function App() {
   return /*#__PURE__*/React.createElement(ErrorBoundary, null, /*#__PURE__*/React.createElement(CharacterApp, null));
 }
-ReactDOM.createRoot(document.getElementById(&quot;character-root&quot;)).render(React.createElement(App));
-}catch(e){document.getElementById(&#x27;character-root&#x27;).textContent=&#x27;Uygulama yüklenemedi: &#x27;+e.message;}
-})();
-&lt;/script&gt;
-&lt;script src=&quot;https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-(() =&gt; {
-  if (window.FloatingUIDOM == null) {
-    return;
-  }
-  const { autoUpdate, computePosition, flip, offset, shift, size } =
-    window.FloatingUIDOM;
-  const tooltipPlacements = new Set([&quot;top&quot;, &quot;right&quot;, &quot;bottom&quot;, &quot;left&quot;]);
-  const tooltipId = `codex-visualization-tooltip-${
-    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
-  }`;
-  const tooltipGap = 5;
-  const hoverDelay = 700;
-  const skipDelay = 300;
-  let activeTrigger = null;
-  let pendingTrigger = null;
-  let tooltip = null;
-  let openTimeout = null;
-  let autoUpdateCleanup = null;
-  let positionRequest = 0;
-  let skipDelayUntil = 0;
-  let lastPointerWasTouch = false;
-  let pinnedByTouch = false;
-
-  const getTrigger = (event) =&gt; {
-    for (const target of event.composedPath()) {
-      if (target?.nodeType === Node.ELEMENT_NODE) {
-        const trigger = target.closest(&quot;[data-tooltip]&quot;);
-        if (trigger) return trigger;
-      }
-    }
-    return null;
-  };
-  const containsTarget = (trigger, target) =&gt;
-    target?.nodeType != null &amp;&amp; trigger.contains(target);
-  const getContent = (trigger) =&gt;
-    trigger.getAttribute(&quot;data-tooltip&quot;)?.trim() ?? &quot;&quot;;
-  const getPlacement = (trigger) =&gt; {
-    const placement = trigger.getAttribute(&quot;data-tooltip-placement&quot;);
-    return tooltipPlacements.has(placement) ? placement : &quot;top&quot;;
-  };
-  const getTooltip = () =&gt; {
-    if (tooltip == null) {
-      tooltip = document.createElement(&quot;div&quot;);
-      tooltip.id = tooltipId;
-      tooltip.className = &quot;tooltip&quot;;
-      tooltip.setAttribute(&quot;role&quot;, &quot;tooltip&quot;);
-    }
-    return tooltip;
-  };
-  const setDescribedBy = (trigger, described) =&gt; {
-    const ids = new Set(
-      (trigger.getAttribute(&quot;aria-describedby&quot;) ?? &quot;&quot;)
-        .split(/\s+/)
-        .filter(Boolean),
-    );
-    if (described) {
-      ids.add(tooltipId);
-    } else {
-      ids.delete(tooltipId);
-    }
-    if (ids.size === 0) {
-      trigger.removeAttribute(&quot;aria-describedby&quot;);
-    } else {
-      trigger.setAttribute(&quot;aria-describedby&quot;, [...ids].join(&quot; &quot;));
-    }
-  };
-  const clearOpenTimeout = () =&gt; {
-    if (openTimeout != null) {
-      window.clearTimeout(openTimeout);
-      openTimeout = null;
-    }
-    pendingTrigger = null;
-  };
-  const closeTooltip = (activateSkipDelay = true) =&gt; {
-    clearOpenTimeout();
-    pinnedByTouch = false;
-    positionRequest += 1;
-    autoUpdateCleanup?.();
-    autoUpdateCleanup = null;
-    if (activeTrigger == null) {
-      return;
-    }
-    setDescribedBy(activeTrigger, false);
-    activeTrigger = null;
-    tooltip?.remove();
-    if (activateSkipDelay) {
-      skipDelayUntil = Date.now() + skipDelay;
-    }
-  };
-  const updatePosition = (trigger, floating) =&gt; {
-    const request = ++positionRequest;
-    void computePosition(trigger, floating, {
-      middleware: [
-        offset(tooltipGap),
-        flip({ padding: tooltipGap }),
-        shift({ padding: tooltipGap }),
-        size({
-          padding: tooltipGap,
-          apply({ availableHeight, availableWidth, elements }) {
-            elements.floating.style.setProperty(
-              &quot;--tooltip-available-width&quot;,
-              `${Math.max(0, availableWidth)}px`,
-            );
-            elements.floating.style.setProperty(
-              &quot;--tooltip-available-height&quot;,
-              `${Math.max(0, availableHeight)}px`,
-            );
-          },
-        }),
-      ],
-      placement: getPlacement(trigger),
-      strategy: &quot;fixed&quot;,
-    })
-      .then(({ x, y }) =&gt; {
-        if (activeTrigger !== trigger || request !== positionRequest) {
-          return;
-        }
-        const scale = window.devicePixelRatio || 1;
-        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
-        floating.style.visibility = &quot;visible&quot;;
-      })
-      .catch(() =&gt; {
-        if (activeTrigger === trigger &amp;&amp; request === positionRequest) {
-          closeTooltip(false);
-        }
-      });
-  };
-  const openTooltip = (trigger) =&gt; {
-    const content = getContent(trigger);
-    if (!trigger.isConnected || content.length === 0) {
-      return;
-    }
-    clearOpenTimeout();
-    if (activeTrigger === trigger) {
-      return;
-    }
-    closeTooltip();
-    const floating = getTooltip();
-    floating.textContent = content;
-    floating.style.visibility = &quot;hidden&quot;;
-    floating.style.transform = &quot;translate(0, 0)&quot;;
-    document.body.appendChild(floating);
-    activeTrigger = trigger;
-    setDescribedBy(trigger, true);
-    autoUpdateCleanup = autoUpdate(trigger, floating, () =&gt; {
-      updatePosition(trigger, floating);
-    });
-  };
-  const requestOpen = (trigger, immediate = false) =&gt; {
-    if (
-      getContent(trigger).length === 0 ||
-      activeTrigger === trigger ||
-      pendingTrigger === trigger
-    ) {
-      return;
-    }
-    clearOpenTimeout();
-    pendingTrigger = trigger;
-    const delay =
-      immediate || activeTrigger != null || Date.now() &lt; skipDelayUntil
-        ? 0
-        : hoverDelay;
-    if (delay === 0) {
-      openTooltip(trigger);
-      return;
-    }
-    openTimeout = window.setTimeout(() =&gt; {
-      openTimeout = null;
-      pendingTrigger = null;
-      openTooltip(trigger);
-    }, delay);
-  };
-  const handlePointerOpen = (event) =&gt; {
-    if (event.pointerType === &quot;touch&quot;) {
-      return;
-    }
-    const trigger = getTrigger(event);
-    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
-      return;
-    }
-    requestOpen(trigger);
-  };
-  const handlePointer = (event) =&gt; {
-    lastPointerWasTouch =
-      event.type === &quot;pointerdown&quot; &amp;&amp; event.pointerType === &quot;touch&quot;;
-  };
-  const handleTouchClick = (event) =&gt; {
-    const isTouch = event.pointerType === &quot;touch&quot; || lastPointerWasTouch;
-    lastPointerWasTouch = false;
-    if (!isTouch || event.detail === 0) {
-      return;
-    }
-    const trigger = getTrigger(event);
-    if (
-      trigger == null ||
-      !trigger.isConnected ||
-      getContent(trigger).length === 0 ||
-      (pinnedByTouch &amp;&amp; activeTrigger === trigger)
-    ) {
-      if (pinnedByTouch) {
-        closeTooltip();
-      }
-      return;
-    }
-    openTooltip(trigger);
-    pinnedByTouch = activeTrigger === trigger;
-    window.setTimeout(() =&gt; {
-      if (activeTrigger === trigger &amp;&amp; !trigger.isConnected) {
-        closeTooltip(false);
-      }
-    }, 0);
-  };
-  const handleLeave = (event) =&gt; {
-    if (pinnedByTouch) {
-      return;
-    }
-    const trigger = getTrigger(event);
-    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
-      return;
-    }
-    if (activeTrigger === trigger || pendingTrigger === trigger) {
-      closeTooltip();
-    }
-  };
-  const handleFocusIn = (event) =&gt; {
-    const trigger = getTrigger(event);
-    if (trigger?.matches(&quot;:focus-visible&quot;)) {
-      requestOpen(trigger, true);
-    }
-  };
-  const handleKeyDown = (event) =&gt; {
-    if (event.key === &quot;Escape&quot;) {
-      closeTooltip();
-    }
-  };
-  const handleContextMenu = (event) =&gt; {
-    lastPointerWasTouch = false;
-    const trigger = getTrigger(event);
-    if (activeTrigger === trigger || pendingTrigger === trigger) {
-      closeTooltip();
-    }
-  };
-  const handlers = {
-    pointerover: handlePointerOpen,
-    pointerdown: handlePointer,
-    pointercancel: handlePointer,
-    click: handleTouchClick,
-    pointerout: handleLeave,
-    focusin: handleFocusIn,
-    focusout: handleLeave,
-    keydown: handleKeyDown,
-    contextmenu: handleContextMenu,
-  };
-  const roots = new Map();
-  const handledEvents = new WeakSet();
-  const handleEvent = (event) =&gt; {
-    if (handledEvents.has(event)) return;
-    handledEvents.add(event);
-    handlers[event.type](event);
-  };
-  const discoverRoots = (node) =&gt; {
-    if (node.shadowRoot) listen(node.shadowRoot);
-    for (const element of node.querySelectorAll(&quot;*&quot;)) {
-      if (element.shadowRoot) listen(element.shadowRoot);
-    }
-  };
-  const listen = (root) =&gt; {
-    if (roots.has(root)) return;
-    for (const type of Object.keys(handlers)) root.addEventListener(type, handleEvent);
-    const observer = new window.MutationObserver((records) =&gt; {
-      for (const { addedNodes } of records) {
-        for (const node of addedNodes) {
-          if (node.nodeType === Node.ELEMENT_NODE) discoverRoots(node);
-        }
-      }
-      for (const [root, cleanup] of roots) {
-        if (root.host &amp;&amp; !root.host.isConnected) {
-          cleanup();
-          roots.delete(root);
-        }
-      }
-      if (activeTrigger &amp;&amp; !activeTrigger.isConnected) closeTooltip(false);
-    });
-    observer.observe(root, { childList: true, subtree: true });
-    roots.set(root, () =&gt; {
-      observer.disconnect();
-      for (const type of Object.keys(handlers)) root.removeEventListener(type, handleEvent);
-    });
-    discoverRoots(root);
-  };
-  const destroy = () =&gt; {
-    closeTooltip(false);
-    lastPointerWasTouch = false;
-    for (const cleanup of roots.values()) cleanup();
-    roots.clear();
-    tooltip = null;
-  };
-
-  // Events between children of one shadow root never reach the document.
-  listen(document);
-  window.addEventListener(&quot;pagehide&quot;, destroy, { once: true });
-})();
-&lt;/script&gt;
-&lt;script id=&quot;codex-visualization-tabs&quot;&gt;
-(() =&gt; {
-  const selector = &#x27;.nav[role=&quot;tablist&quot;] [role=&quot;tab&quot;]&#x27;;
-  const disabled = &#x27;:disabled,[aria-disabled=&quot;true&quot;]&#x27;;
-  const selectTab = (selected) =&gt; {
-    const panelId = selected.getAttribute(&quot;aria-controls&quot;);
-    for (const tab of selected.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;)) {
-      const active = tab === selected;
-      tab.classList.toggle(&quot;active&quot;, active);
-      tab.setAttribute(&quot;aria-selected&quot;, String(active));
-      const id = tab.getAttribute(&quot;aria-controls&quot;);
-      const panel = id &amp;&amp; document.getElementById(id);
-      if (panel != null) {
-        panel.hidden = id !== panelId;
-        if (!panel.hidden &amp;&amp; selected.id) {
-          panel.setAttribute(&quot;aria-labelledby&quot;, selected.id);
-        }
-      }
-    }
-  };
-  const interact = (event) =&gt; {
-    const tab = event.target?.closest?.(selector);
-    if (event.defaultPrevented || tab == null || tab.matches(disabled)) {
-      return;
-    }
-    if (event.type === &quot;click&quot;) {
-      selectTab(tab);
-      return;
-    }
-    const tabs = Array.from(
-      tab.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;),
-    ).filter((candidate) =&gt; !candidate.matches(disabled));
-    const current = tabs.indexOf(tab);
-    let next;
-    if (event.key === &quot;ArrowRight&quot; || event.key === &quot;ArrowDown&quot;) {
-      next = (current + 1) % tabs.length;
-    } else if (event.key === &quot;ArrowLeft&quot; || event.key === &quot;ArrowUp&quot;) {
-      next = (current + tabs.length - 1) % tabs.length;
-    } else if (event.key === &quot;Home&quot;) {
-      next = 0;
-    } else if (event.key === &quot;End&quot;) {
-      next = tabs.length - 1;
-    } else {
-      return;
-    }
-    event.preventDefault();
-    tabs[next].focus();
-    selectTab(tabs[next]);
-  };
-
-  for (const list of document.querySelectorAll(&#x27;.nav[role=&quot;tablist&quot;]&#x27;)) {
-    const selected =
-      list.querySelector(&#x27;[role=&quot;tab&quot;][aria-selected=&quot;true&quot;]&#x27;) ??
-      list.querySelector(&#x27;[role=&quot;tab&quot;].active&#x27;) ??
-      list.querySelector(&#x27;[role=&quot;tab&quot;]&#x27;);
-    if (selected != null) {
-      selectTab(selected);
-    }
-  }
-  document.addEventListener(&quot;click&quot;, interact);
-  document.addEventListener(&quot;keydown&quot;, interact);
-  window.addEventListener(&quot;pagehide&quot;, () =&gt; {
-    document.removeEventListener(&quot;click&quot;, interact);
-    document.removeEventListener(&quot;keydown&quot;, interact);
-  }, { once: true });
-})();
-&lt;/script&gt;
-&lt;script id=&quot;codex-visualization-carousel&quot;&gt;
-  (() =&gt; {
-    for (const root of document.querySelectorAll(&quot;.viz-carousel&quot;)) {
-      const panels = Array.from(
-        root.querySelectorAll(&quot;:scope &gt; [data-variant]&quot;),
-      );
-      if (panels.length === 0) {
-        continue;
-      }
-      root.setAttribute(&quot;role&quot;, &quot;group&quot;);
-      panels.forEach((panel, index) =&gt; {
-        panel.hidden = index !== 0;
-        panel.setAttribute(&quot;role&quot;, &quot;group&quot;);
-        if (!panel.hasAttribute(&quot;aria-label&quot;)) {
-          panel.setAttribute(&quot;aria-label&quot;, panel.dataset.variant);
-        }
-      });
-      root.dataset.activeVariant = panels[0].dataset.variant;
-      if (panels.length === 1) {
-        continue;
-      }
-
-      const controls = document.createElement(&quot;div&quot;);
-      controls.className = &quot;viz-carousel-controls&quot;;
-      // Portable copy of the settings dropdown&#x27;s legacy glyph; no 14px icon-package preset matches it.
-      // https://github.com/openai/openai/blob/master/codex/codex-apps/webview/src/icons/chevron.svg
-      controls.innerHTML = `
-      &lt;button type=&quot;button&quot; class=&quot;viz-carousel-previous cursor-interaction&quot;&gt;&lt;i data-lucide=&quot;chevron-left&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt;&lt;/button&gt;
-      &lt;details class=&quot;viz-carousel-picker&quot;&gt;
-        &lt;summary class=&quot;cursor-interaction&quot;&gt;
-          &lt;span class=&quot;viz-carousel-count tabular-nums&quot;&gt;&lt;/span&gt;
-          &lt;span class=&quot;viz-carousel-name&quot;&gt;&lt;/span&gt;
-          &lt;svg class=&quot;viz-carousel-caret&quot; width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 20 21&quot; fill=&quot;none&quot; aria-hidden=&quot;true&quot; focusable=&quot;false&quot;&gt;
-            &lt;path d=&quot;M15.2793 7.71101C15.539 7.45131 15.961 7.45131 16.2207 7.71101C16.4804 7.97071 16.4804 8.39272 16.2207 8.65242L10.4707 14.4024C10.211 14.6621 9.78902 14.6621 9.52932 14.4024L3.77932 8.65242L3.69436 8.54792C3.52385 8.28979 3.55205 7.93828 3.77932 7.71101C4.00659 7.48374 4.3581 7.45554 4.61623 7.62605L4.72073 7.71101L10 12.9903L15.2793 7.71101Z&quot; fill=&quot;currentColor&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;0.6&quot; /&gt;
-          &lt;/svg&gt;
-        &lt;/summary&gt;
-        &lt;div class=&quot;viz-carousel-options&quot;&gt;&lt;/div&gt;
-      &lt;/details&gt;
-      &lt;button type=&quot;button&quot; class=&quot;viz-carousel-next cursor-interaction&quot;&gt;&lt;i data-lucide=&quot;chevron-right&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt;&lt;/button&gt;`;
-      const previous = controls.querySelector(&quot;.viz-carousel-previous&quot;);
-      const next = controls.querySelector(&quot;.viz-carousel-next&quot;);
-      const picker = controls.querySelector(&quot;.viz-carousel-picker&quot;);
-      const summary = picker.querySelector(&quot;summary&quot;);
-      const count = controls.querySelector(&quot;.viz-carousel-count&quot;);
-      const name = controls.querySelector(&quot;.viz-carousel-name&quot;);
-      const options = controls.querySelector(&quot;.viz-carousel-options&quot;);
-      const status = document.createElement(&quot;span&quot;);
-      status.className = &quot;sr-only&quot;;
-      status.setAttribute(&quot;role&quot;, &quot;status&quot;);
-      status.setAttribute(&quot;aria-live&quot;, &quot;polite&quot;);
-      status.setAttribute(&quot;aria-atomic&quot;, &quot;true&quot;);
-      previous.setAttribute(
-        &quot;aria-label&quot;,
-        root.dataset.previousLabel ?? &quot;Previous variant&quot;,
-      );
-      next.setAttribute(&quot;aria-label&quot;, root.dataset.nextLabel ?? &quot;Next variant&quot;);
-
-      let active = 0;
-      let mousePointerId = null;
-      let summaryPointerHandled = false;
-      summary.addEventListener(&quot;pointerdown&quot;, (event) =&gt; {
-        summaryPointerHandled =
-          event.pointerType === &quot;mouse&quot; &amp;&amp; event.button === 0 &amp;&amp; !event.ctrlKey;
-        if (!summaryPointerHandled) {
-          return;
-        }
-        event.preventDefault();
-        summary.focus({ preventScroll: true });
-        picker.open = !picker.open;
-        mousePointerId = picker.open ? event.pointerId : null;
-      });
-      summary.addEventListener(&quot;click&quot;, (event) =&gt; {
-        if (summaryPointerHandled &amp;&amp; event.detail &gt; 0) {
-          event.preventDefault();
-        }
-      });
-      const choices = panels.map((panel, index) =&gt; {
-        const choice = document.createElement(&quot;button&quot;);
-        choice.type = &quot;button&quot;;
-        choice.className = &quot;cursor-interaction&quot;;
-        choice.textContent = panel.dataset.variant;
-        choice.addEventListener(&quot;click&quot;, () =&gt; {
-          select(index);
-          summary.focus();
-        });
-        choice.addEventListener(&quot;pointerup&quot;, (event) =&gt; {
-          if (
-            picker.open &amp;&amp;
-            event.pointerType === &quot;mouse&quot; &amp;&amp;
-            event.button === 0 &amp;&amp;
-            event.pointerId === mousePointerId
-          ) {
-            choice.click();
-          }
-        });
-        options.appendChild(choice);
-        return choice;
-      });
-      const select = (index) =&gt; {
-        const changed = active !== index;
-        active = index;
-        panels.forEach((panel, position) =&gt; {
-          panel.hidden = position !== active;
-          choices[position].setAttribute(
-            &quot;aria-current&quot;,
-            String(position === active),
-          );
-        });
-        root.dataset.activeVariant = panels[active].dataset.variant;
-        count.textContent = `${active + 1} / ${panels.length}`;
-        name.textContent = panels[active].dataset.variant;
-        picker.open = false;
-        mousePointerId = null;
-        if (changed) {
-          status.textContent = `${count.textContent}: ${name.textContent}`;
-        }
-      };
-      previous.addEventListener(&quot;click&quot;, () =&gt;
-        select((active + panels.length - 1) % panels.length),
-      );
-      next.addEventListener(&quot;click&quot;, () =&gt;
-        select((active + 1) % panels.length),
-      );
-      picker.addEventListener(&quot;keydown&quot;, (event) =&gt; {
-        if (event.key === &quot;Escape&quot; &amp;&amp; picker.open) {
-          event.preventDefault();
-          picker.open = false;
-          mousePointerId = null;
-          summary.focus();
-          return;
-        }
-        if (event.altKey || event.ctrlKey || event.metaKey) {
-          return;
-        }
-        const index = choices.indexOf(document.activeElement);
-        let nextIndex;
-        if (event.key === &quot;ArrowDown&quot;) {
-          nextIndex = index &lt; 0 ? active : (index + 1) % choices.length;
-        } else if (event.key === &quot;ArrowUp&quot;) {
-          nextIndex = index &lt; 0 ? active : (index + choices.length - 1) % choices.length;
-        } else if (picker.open &amp;&amp; event.key === &quot;Home&quot;) {
-          nextIndex = 0;
-        } else if (picker.open &amp;&amp; event.key === &quot;End&quot;) {
-          nextIndex = choices.length - 1;
-        } else {
-          return;
-        }
-        event.preventDefault();
-        picker.open = true;
-        choices[nextIndex].focus();
-      });
-      picker.addEventListener(&quot;focusout&quot;, (event) =&gt; {
-        if (!picker.contains(event.relatedTarget)) {
-          picker.open = false;
-          mousePointerId = null;
-        }
-      });
-      const dismiss = (event) =&gt; {
-        if (!summary.contains(event.target)) {
-          mousePointerId = null;
-        }
-        if (!picker.contains(event.target)) {
-          picker.open = false;
-        }
-      };
-      const endPointerSelection = () =&gt; {
-        mousePointerId = null;
-      };
-      const sizePicker = () =&gt; {
-        root.style.setProperty(
-          &quot;--viz-carousel-picker-height&quot;,
-          `${picker.open ? options.offsetHeight : 0}px`,
-        );
-      };
-      picker.addEventListener(&quot;toggle&quot;, sizePicker);
-      window.addEventListener(&quot;resize&quot;, sizePicker);
-      document.addEventListener(&quot;pointerdown&quot;, dismiss);
-      document.addEventListener(&quot;pointerup&quot;, endPointerSelection);
-      document.addEventListener(&quot;pointercancel&quot;, endPointerSelection);
-      window.addEventListener(&quot;blur&quot;, endPointerSelection);
-      window.addEventListener(
-        &quot;pagehide&quot;,
-        () =&gt; {
-          document.removeEventListener(&quot;pointerdown&quot;, dismiss);
-          document.removeEventListener(&quot;pointerup&quot;, endPointerSelection);
-          document.removeEventListener(&quot;pointercancel&quot;, endPointerSelection);
-          window.removeEventListener(&quot;blur&quot;, endPointerSelection);
-          window.removeEventListener(&quot;resize&quot;, sizePicker);
-        },
-        { once: true },
-      );
-      root.append(controls, status);
-      select(0);
-    }
-  })();
-&lt;/script&gt;
-&lt;script id=&quot;codex-visualization-lucide&quot; async src=&quot;https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-(() =&gt; {
-  const initialize = () =&gt; {
-    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
-  };
-  if (globalThis.lucide != null) {
-    initialize();
-    return;
-  }
-  document
-    .getElementById(&quot;codex-visualization-lucide&quot;)
-    ?.addEventListener(&quot;load&quot;, initialize, { once: true });
-})();
-&lt;/script&gt;
-
-&lt;/body&gt;
-&lt;/html&gt;
-"></iframe>
-<script>(() => {
-  const frame = document.getElementById("codex-visualization");
-  if (!(frame instanceof HTMLIFrameElement)) {
-    return;
-  }
-  let viewportHeight = globalThis.innerHeight;
-  const storageKey = `codex:visualization-widget-state-v2:${JSON.stringify([
-    globalThis.location.pathname,
-    globalThis.location.search,
-  ])}`;
-  const parseState = (serializedState) => {
-    if (
-      typeof serializedState !== "string" ||
-      new TextEncoder().encode(serializedState).length > 16 * 1024
-    ) {
-      throw new TypeError(
-        "Widget state must be a JSON object of at most 16 KiB",
-      );
-    }
-    /** @type {unknown} */
-    const state = JSON.parse(serializedState);
-    if (
-      state == null ||
-      typeof state !== "object" ||
-      Array.isArray(state) ||
-      ("imageIds" in state &&
-        (!Array.isArray(state.imageIds) || state.imageIds.length > 0))
-    ) {
-      throw new TypeError("Widget state must be a JSON object");
-    }
-    const storedState = { modelContent: null, privateContent: null, ...state };
-    const canonicalState = JSON.stringify(
-      storedState,
-      (_key, /** @type {unknown} */ value) => {
-        if (typeof value === "number" && !Number.isFinite(value)) {
-          throw new TypeError("Widget state must contain finite numbers");
-        }
-        return value;
-      },
-    );
-    if (new TextEncoder().encode(canonicalState).length > 16 * 1024) {
-      throw new TypeError(
-        "Widget state must be a JSON object of at most 16 KiB",
-      );
-    }
-    return storedState;
-  };
-  let storage = null;
-  let state = null;
-  try {
-    const localStorage = globalThis.localStorage;
-    const probeKey = `${storageKey}:probe`;
-    localStorage.setItem(probeKey, "1");
-    localStorage.removeItem(probeKey);
-    storage = localStorage;
-    const savedState = storage.getItem(storageKey);
-    if (savedState != null) {
-      try {
-        state = parseState(savedState);
-      } catch {
-        // Invalid saved state does not disable future writes.
-      }
-    }
-  } catch {
-    storage = null;
-  }
-  const initialGlobals = {
-    widgetState: state,
-    statePersistence: storage == null ? "none" : "local",
-  };
-
-  const channel = new MessageChannel();
-  channel.port1.addEventListener("message", (event) => {
-    const data = event.data;
-    if (typeof data !== "object" || data == null) {
-      return;
-    }
-    if (data.type === "widget-state-write") {
-      if (!Number.isSafeInteger(data.id) || data.id <= 0) {
-        return;
-      }
-      let ok = false;
-      try {
-        if (storage != null) {
-          const state = parseState(data.state);
-          storage.setItem(storageKey, JSON.stringify(state));
-          ok = true;
-        }
-      } catch {
-        // Storage denial, quota limits, and invalid state return a failed receipt.
-      }
-      channel.port1.postMessage({
-        type: "widget-state-result",
-        id: data.id,
-        ok,
-      });
-      return;
-    }
-    if (data.type === "height") {
-      const height = data.height;
-      if (
-        typeof height === "number" &&
-        Number.isFinite(height) &&
-        height >= 0 &&
-        height <= 10_000
-      ) {
-        frame.style.height = Math.ceil(height) + "px";
-      }
-      return;
-    }
-    if (data.type === "scroll-to") {
-      const top = data.top;
-      if (
-        typeof top === "number" &&
-        Number.isFinite(top) &&
-        top >= 0 &&
-        globalThis.navigator.userActivation?.isActive === true
-      ) {
-        globalThis.scrollTo({
-          top: Math.ceil(
-            globalThis.scrollY + frame.getBoundingClientRect().top + top,
-          ),
-        });
-      }
-      return;
-    }
-    if (data.type === "open-external") {
-      const rawHref = data.href;
-      if (typeof rawHref !== "string") {
-        return;
-      }
-      let href;
-      try {
-        const url = new URL(rawHref, document.baseURI);
-        if (url.protocol !== "https:") {
-          return;
-        }
-        href = url.href;
-      } catch {
-        return;
-      }
-      if (globalThis.navigator.userActivation?.isActive === true) {
-        const anchor = document.createElement("a");
-        anchor.href = href;
-        anchor.rel = "noopener noreferrer";
-        anchor.target = "_blank";
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-      }
-      return;
-    }
-    if (data.type === "follow-up") {
-      const prompt = data.prompt;
-      if (
-        typeof prompt !== "string" ||
-        globalThis.navigator.userActivation?.isActive !== true
-      ) {
-        return;
-      }
-      const title = data.title;
-      globalThis.prompt(typeof title === "string" ? title : prompt, prompt);
-    }
-  });
-  channel.port1.start();
-  const srcdoc = frame.dataset.srcdoc;
-  if (srcdoc == null) {
-    return;
-  }
-  globalThis.addEventListener("resize", () => {
-    const height = Number.parseFloat(frame.style.height);
-    if (!Number.isFinite(height) || height <= viewportHeight) {
-      frame.style.removeProperty("height");
-    }
-    viewportHeight = globalThis.innerHeight;
-    channel.port1.postMessage({ type: "measure" });
-  });
-  frame.addEventListener(
-    "load",
-    () => {
-      frame.contentWindow?.postMessage(
-        { type: "codex-visualization-initialize" },
-        "*",
-        [channel.port2],
-      );
-    },
-    { once: true },
-  );
-  // Match the trusted bootstrap element, not the same text in an authored title.
-  frame.srcdoc = srcdoc.replace(
-    '<script type="application/json" id="codex-visualization-widget-state">__CODEX_VISUALIZATION_WIDGET_STATE__<\/script>',
-    () =>
-      '<script type="application/json" id="codex-visualization-widget-state">' +
-      JSON.stringify(initialGlobals).replaceAll("<", "\\u003c") +
-      "<\/script>",
-  );
-  delete frame.dataset.srcdoc;
+ReactDOM.createRoot(document.getElementById("character-root")).render(React.createElement(App));
+}catch(e){document.getElementById('character-root').textContent='The application could not load: '+e.message;}
 })();
 </script>
 </body>
